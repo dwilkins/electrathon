@@ -27,3 +27,12 @@
 bool TimedTask::canRun(uint32_t now) {
     return now >= runTime;
 }
+
+bool Task::canLog(uint32_t now) {
+    return now >= logTime;
+}
+
+char *Task::getLogData(uint32_t now) {
+  incLogTime(logRate);
+  return logBuffer;
+}

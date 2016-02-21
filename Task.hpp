@@ -26,12 +26,34 @@
 #define TASK_HPP
 
 #include <Arduino.h>
+#define TASK_LOG_BUFFER_SIZE 256
 
 class Task {
 public:
+  inline Task(uint32_t _logRate = 10000) { logRate = _logRate; }
+  enum RunMode { test,production };
+
   virtual bool canRun(uint32_t now) = 0;
   virtual void run(uint32_t now) = 0;
 
+  // Logging
+  virtual bool canLog(uint32_t now);
+  inline void setLogTime(uint32_t when) { logTime = when; }
+  inline void incLogTime(uint32_t inc) { logTime += inc; }
+  inline uint32_t getLogTime() { return logTime; }
+  inline uint32_t getLogRate() { return logRate; }
+
+  virtual const char *getLogHeader() = 0;
+  virtual char *getLogData(uint32_t now);
+
+  virtual void init(RunMode mode) {setRunMode(mode);};
+  virtual void setRunMode(RunMode mode) { runMode = mode;}
+
+protected:
+  char logBuffer[TASK_LOG_BUFFER_SIZE];
+  uint32_t logTime;
+  uint32_t logRate;
+  RunMode runMode;
 };
 
 class TimedTask : public Task {

@@ -25,18 +25,42 @@
 #include "TaskScheduler.hpp"
 
 void TaskScheduler::run() {
-    while (1) {
-        uint32_t now = millis();
-        Task **tpp = tasks;
-        for (int t = 0; t < numTasks; t++) {
-            Task *tp = *tpp;
-            if (tp->canRun(now)) {
-                tp->run(now);
-                break;
-            }
-            tpp++;
-        }
+  {
+    Task **tpp = tasks;
+    Serial.print("millis");
+    for (int t = 0; t < numTasks; t++) {
+      Task *tp = *tpp;
+      Serial.print("\t");
+      Serial.print(tp->getLogHeader());
+      tpp++;
     }
+
+  }
+  Serial.println("");
+  while (1) {
+    uint32_t now = millis();
+    bool log_now = false;
+    Task **tpp = tasks;
+    for (int t = 0; t < numTasks; t++) {
+      Task *tp = tasks[t];
+      if (tp->canRun(now)) {
+        tp->run(now);
+      }
+      log_now |= tp->canLog(now);
+      //      tpp++;
+    }
+    if(log_now) {
+      Serial.print(now);
+      Serial.print("\t");
+      for (int t = 0; t < numTasks; t++) {
+        Task *tp = *tpp;
+        Serial.print("\t");
+        Serial.print(tp->getLogData(now));
+        tpp++;
+      }
+      Serial.println("");
+    }
+  }
 }
 
 TaskScheduler::TaskScheduler(Task **_tasks, uint8_t _numTasks) :
