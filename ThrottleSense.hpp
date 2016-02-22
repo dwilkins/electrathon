@@ -50,7 +50,7 @@ public:
   }
 
   virtual void run(uint32_t now);
-  virtual char *getLogHeader();
+  virtual const char *getLogHeader();
   virtual void init(RunMode mode);
 
   float getLevel() { return m_level; };
@@ -61,8 +61,8 @@ public:
 
 private:
   float m_level;
+  float m_old_level;
   int16_t m_input_level;
-  uint32_t m_old_level; // 0 - 100???
   uint32_t m_rate; // In milliseconds
   uint32_t m_pin;
   uint32_t m_input_min;

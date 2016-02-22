@@ -43,7 +43,7 @@ public:
   inline uint32_t getLogTime() { return logTime; }
   inline uint32_t getLogRate() { return logRate; }
 
-  virtual char *getLogHeader() = 0;
+  virtual const char *getLogHeader() = 0;
   virtual char *getLogData(uint32_t now);
 
   virtual void init(RunMode mode) {setRunMode(mode);};

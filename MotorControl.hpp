@@ -45,19 +45,26 @@ public:
       m_samples.samples[i].sample_time = 0;
       m_samples.samples[i].amps = m_samples.samples[i].throttle_level = 0.0;
     }
+    for(int i = 0; i< sizeof(m_commands.commands) / sizeof(m_commands.commands[0]); i++) {
+      m_commands.commands[i].command_time = 0;
+      m_commands.commands[i].motor_level = 0;
+      m_commands.commands[i].transmission_level = 0;
+      m_commands.commands[i].completed = true;
+    }
     m_target_speed = m_current_speed = 0;
     m_target_transmission = m_current_transmission = 0;
     m_amps = 0.0;
     m_throttle = 0.0;
     m_amps_resolution = 0.5;
     m_throttle_resolution = 0.5;
+    m_throttle_threshold = 75;
   }
 
   virtual ~MotorControl();
 
   virtual bool canRun(uint32_t now);
   virtual void run(uint32_t now);
-  virtual char *getLogHeader();
+  virtual const char *getLogHeader();
   virtual void init(RunMode mode);
 
   bool readInputValues(uint32_t now);
@@ -111,6 +118,8 @@ private:
 
   float m_amps_resolution;
   float m_throttle_resolution;
+
+  float m_throttle_threshold;
 
   void populate_log_buffer();
 

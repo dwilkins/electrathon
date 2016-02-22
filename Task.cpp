@@ -25,14 +25,14 @@
 #include "Task.hpp"
 
 bool TimedTask::canRun(uint32_t now) {
-    return now >= runTime;
+  return (now >= runTime);
 }
 
 bool Task::canLog(uint32_t now) {
-    return now >= logTime;
+  return (now >= logTime);
 }
 
 char *Task::getLogData(uint32_t now) {
-  incLogTime(logRate);
+  setLogTime(now + logRate);
   return logBuffer;
 }

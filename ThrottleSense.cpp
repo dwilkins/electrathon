@@ -30,13 +30,15 @@ void ThrottleSense::populate_log_buffer() {
 }
 
 
-char *ThrottleSense::getLogHeader() {
-  return (char *)"current_throttle_level\tthrottle_input_level";
+const char *ThrottleSense::getLogHeader() {
+  //  const PROGMEM static char headers[] = "current_throttle_level\tthrottle_input_level";
+  return "current_throttle_level\tthrottle_input_level";
+  //  return headers;
 }
 
 
 void ThrottleSense::processInputValue(uint32_t now) {
-  m_level = m_input_level;
+  m_level = ((float)(m_input_max - (m_input_max - m_input_level)) / (float)m_input_max) * 100.0;
 }
 
 int16_t ThrottleSense::readInputValue(uint32_t now) {
@@ -45,20 +47,46 @@ int16_t ThrottleSense::readInputValue(uint32_t now) {
     // TODO: read the input value
     input_level = m_input_level;
   } else if(runMode == Task::RunMode::test) {
-    static int test_data[][2] = {
+    static const PROGMEM uint32_t test_data[][2] = {
       {0,0},
       {6000,25},
       {10000,29},
       {11000,33},
       {16000,35},
       {20000,33},
-      {21000,29}
+      {21000,29},
+      {23000,200},
+      {25000,300},
+      {27000,400},
+      {29000,500},
+      {31000,600},
+      {33000,700},
+      {35000,800},
+      {37000,900},
+      {39000,1000},
+      {41000,1024},
+      {43000,900},
+      {45000,800},
+      {47000,700},
+      {49000,600},
+      {51000,500},
+      {53000,400},
+      {55000,300},
+      {57000,200},
+      {59000,100},
+      {61000,0}
     };
     for(int i = 0;i < sizeof(test_data) / sizeof(test_data[0]);i++) {
-      if(m_last_input_time <= test_data[i][0] && now >= test_data[i][0]) {
-        input_level = test_data[i][1];
+      uint32_t test_time = pgm_read_dword_near((uint16_t)&test_data[i][0]);
+      uint32_t test_value = pgm_read_dword_near((uint16_t)&test_data[i][1]);
+      if(m_last_input_time <= test_time && now >= test_time) {
+        input_level = test_value;
         break;
-      }
+        }
+      // if(m_last_input_time <= test_data[i][0] && now >= test_data[i][0]) {
+      //   input_level = test_data[i][1];
+      //   break;
+      // }
     }
   }
   m_last_input_time = now;

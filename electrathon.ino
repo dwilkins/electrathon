@@ -4,7 +4,7 @@
 #include "ThrottleSense.hpp"
 #include "MotorControl.hpp"
 CurrentSense current_sense(0x19,100);
-ThrottleSense throttle_sense(0x19,100);
+ThrottleSense throttle_sense(0x18,100);
 MotorControl motor_control(0x20,&current_sense,&throttle_sense);
 Task *tasks[] = { &current_sense, &throttle_sense, &motor_control };
 
@@ -22,13 +22,6 @@ void setup() {
 
 void loop() {
   // put your setup code here, to run once:
-
-  Serial.print("current_sense size is ");
-  Serial.println(sizeof(CurrentSense));
-  Serial.print("throttle_sense size is ");
-  Serial.println(sizeof(ThrottleSense));
-  Serial.print("motor_control size is ");
-  Serial.println(sizeof(MotorControl));
   // put your main code here, to run repeatedly:
   sched.run();
 }

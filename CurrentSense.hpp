@@ -54,7 +54,7 @@ public:
   virtual ~CurrentSense();
 
   virtual void run(uint32_t now);
-  virtual char *getLogHeader();
+  virtual const char *getLogHeader();
   //  virtual char *getLogData(uint32_t now);
   virtual void init(RunMode mode);
 

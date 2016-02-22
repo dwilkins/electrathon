@@ -41,11 +41,16 @@ void MotorControl::populate_log_buffer() {
   strcat(logBuffer,String(m_throttle,6).c_str());
 }
 
-char *MotorControl::getLogHeader() {
-  return (char *)"current_speed\ttarget_speed\tcurrent_gear\ttarget_gear\tamps\tthrottle";
+const char *MotorControl::getLogHeader() {
+  return "current_speed\ttarget_speed\tcurrent_gear\ttarget_gear\tamps\tthrottle";
 }
 
 void MotorControl::processInputValues(uint32_t now) {
+  // calculate motor speed
+  // calculate transmission setting
+  // calculate number of steps and step spacing to achieve
+  // PROFIT
+  //  if(m_throttle < )
 }
 
 //
@@ -81,11 +86,11 @@ bool MotorControl::readInputValues(uint32_t now) {
   amps = 0.0;
   throttle = 0.0;
   for(int i=0;i<max_samples;i++) {
-    amps += (float)m_samples.samples[i].amps;
-    throttle += (float)m_samples.samples[i].throttle_level;
+    amps += m_samples.samples[i].amps;
+    throttle += m_samples.samples[i].throttle_level;
   }
-  amps /= (float)max_samples;
-  throttle /= (float)max_samples;
+  amps = amps / (float)max_samples;
+  throttle = throttle / (float)max_samples;
   if((amps > (m_amps + m_amps_resolution) || amps < (m_amps - m_amps_resolution)) ||
      (throttle > (m_throttle + m_throttle_resolution) || throttle < (m_throttle - m_throttle_resolution))) {
     m_amps = amps;
