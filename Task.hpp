@@ -26,7 +26,7 @@
 #define TASK_HPP
 
 #include <Arduino.h>
-#define TASK_LOG_BUFFER_SIZE 256
+#define TASK_LOG_BUFFER_SIZE 100
 
 class Task {
 public:
@@ -43,7 +43,7 @@ public:
   inline uint32_t getLogTime() { return logTime; }
   inline uint32_t getLogRate() { return logRate; }
 
-  virtual const char *getLogHeader() = 0;
+  virtual char *getLogHeader() = 0;
   virtual char *getLogData(uint32_t now);
 
   virtual void init(RunMode mode) {setRunMode(mode);};

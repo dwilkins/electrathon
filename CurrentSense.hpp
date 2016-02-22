@@ -54,7 +54,7 @@ public:
   virtual ~CurrentSense();
 
   virtual void run(uint32_t now);
-  virtual const char *getLogHeader();
+  virtual char *getLogHeader();
   //  virtual char *getLogData(uint32_t now);
   virtual void init(RunMode mode);
 
@@ -84,6 +84,7 @@ private:
   uint32_t m_last_input_time;
   Adafruit_ADS1115 ads;
 
+  void populate_log_buffer();
 };
 
 #endif

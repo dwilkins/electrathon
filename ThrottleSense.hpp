@@ -50,7 +50,7 @@ public:
   }
 
   virtual void run(uint32_t now);
-  virtual const char *getLogHeader();
+  virtual char *getLogHeader();
   virtual void init(RunMode mode);
 
   float getLevel() { return m_level; };
@@ -71,6 +71,8 @@ private:
   float m_output_max;
 
   uint32_t m_last_input_time;
+  void populate_log_buffer();
+
 };
 
 #endif

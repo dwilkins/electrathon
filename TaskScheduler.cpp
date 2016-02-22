@@ -26,37 +26,27 @@
 
 void TaskScheduler::run() {
   {
-    Task **tpp = tasks;
     Serial.print("millis");
     for (int t = 0; t < numTasks; t++) {
-      Task *tp = *tpp;
       Serial.print("\t");
-      Serial.print(tp->getLogHeader());
-      tpp++;
+      Serial.print(tasks[t]->getLogHeader());
     }
-
-  }
   Serial.println("");
+  }
   while (1) {
     uint32_t now = millis();
     bool log_now = false;
-    Task **tpp = tasks;
     for (int t = 0; t < numTasks; t++) {
-      Task *tp = tasks[t];
-      if (tp->canRun(now)) {
-        tp->run(now);
+      if (tasks[t]->canRun(now)) {
+        tasks[t]->run(now);
       }
-      log_now |= tp->canLog(now);
-      //      tpp++;
+      log_now |= tasks[t]->canLog(now);
     }
     if(log_now) {
       Serial.print(now);
-      Serial.print("\t");
       for (int t = 0; t < numTasks; t++) {
-        Task *tp = *tpp;
         Serial.print("\t");
-        Serial.print(tp->getLogData(now));
-        tpp++;
+        Serial.print(tasks[t]->getLogData(now));
       }
       Serial.println("");
     }

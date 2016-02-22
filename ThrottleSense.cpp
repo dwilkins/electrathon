@@ -4,7 +4,7 @@
 void ThrottleSense::init(RunMode mode) {
   // do some stuff to initialize it
   //  Serial.println("ThrottleSense::init ");
-  strncpy(logBuffer,(char *)"No ThrottleSense Logging Information",sizeof(logBuffer)-1);
+  populate_log_buffer();
   setLogTime(millis());
   Task::init(mode);
 }
@@ -16,16 +16,22 @@ void ThrottleSense::run(uint32_t now) {
   m_input_level = readInputValue(now);
   processInputValue(now);
   if(m_level != m_old_level) {
-    strcpy(logBuffer,String(m_level).c_str());
-    strcat(logBuffer,"\t");
-    strcat(logBuffer,String(m_input_level).c_str());
+    populate_log_buffer();
     setLogTime(now);
     m_old_level = m_level;
   }
 }
 
-const char *ThrottleSense::getLogHeader() {
-  return "current_throttle_level\tthrottle_input_level";
+void ThrottleSense::populate_log_buffer() {
+  memset(logBuffer,0,sizeof(logBuffer)-1);
+  strcpy(logBuffer,String(m_level,6).c_str());
+  strcat(logBuffer,"\t");
+  strcat(logBuffer,String(m_input_level).c_str());
+}
+
+
+char *ThrottleSense::getLogHeader() {
+  return (char *)"current_throttle_level\tthrottle_input_level";
 }
 
 
