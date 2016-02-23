@@ -37,7 +37,6 @@ void MotorControl::run(uint32_t now) {
 // needed.
 //
 void MotorControl::populate_log_buffer() {
-  memset(logBuffer,0,sizeof(logBuffer)-1);
   strcpy(logBuffer,String(m_current_speed).c_str());
   strcat(logBuffer,"\t");
   strcat(logBuffer,String(m_target_speed).c_str());

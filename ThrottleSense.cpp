@@ -23,7 +23,6 @@ void ThrottleSense::run(uint32_t now) {
 }
 
 void ThrottleSense::populate_log_buffer() {
-  memset(logBuffer,0,sizeof(logBuffer)-1);
   strcpy(logBuffer,String(m_level,6).c_str());
   strcat(logBuffer,"\t");
   strcat(logBuffer,String(m_input_level).c_str());
@@ -31,9 +30,7 @@ void ThrottleSense::populate_log_buffer() {
 
 
 const char *ThrottleSense::getLogHeader() {
-  //  const PROGMEM static char headers[] = "current_throttle_level\tthrottle_input_level";
   return "current_throttle_level\tthrottle_input_level";
-  //  return headers;
 }
 
 

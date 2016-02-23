@@ -25,7 +25,6 @@ void CurrentSense::run(uint32_t now) {
 }
 
 void CurrentSense::populate_log_buffer() {
-  memset(logBuffer,0,sizeof(logBuffer)-1);
   strcpy(logBuffer,String(m_amps,6).c_str());
   strcat(logBuffer,"\t");
   strcat(logBuffer,String(m_input_value).c_str());
