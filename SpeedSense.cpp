@@ -34,12 +34,12 @@ void SpeedSense::run(uint32_t now) {
 }
 
 void SpeedSense::populate_log_buffer() {
-  static const char mph_str[] PROGMEM = "mph\t";
-  static const char rpm_str[] PROGMEM = "rpm";
-  strcpy(logBuffer,String(m_speed,2).c_str());
-  strcat_P(logBuffer,mph_str);
+  static const char mph_str[] PROGMEM = "mph";
+  static const char rpm_str[] PROGMEM = "rpm\t";
   strcat(logBuffer,String(m_rpm).c_str());
   strcat_P(logBuffer,rpm_str);
+  strcpy(logBuffer,String(m_speed,2).c_str());
+  strcat_P(logBuffer,mph_str);
 }
 
 
@@ -74,9 +74,10 @@ int16_t SpeedSense::readInputValue(uint32_t now) {
     //
     static const PROGMEM uint32_t test_data[][2] = {
       {1,0},
-      {10000,68},
-      {20000,138},
-      {30000,140}
+      {10000,34},
+      {20000,70},
+      {30000,80},
+      {40000,100}
     };
     // Serial.print(F("m_last_input_time="));
     // Serial.print(m_last_input_time);
@@ -97,14 +98,14 @@ int16_t SpeedSense::readInputValue(uint32_t now) {
     }
   }
   if(current_rpms > -1) {
-    Serial.print(F("\nCalculating from current_rpms="));
-    Serial.print(current_rpms);
-    Serial.print(F("current_input_time="));
-    Serial.print(current_input_time);
-    Serial.print(F("m_last_input_time="));
-    Serial.print(m_last_input_time);
-    Serial.print(F("elapsed="));
-    Serial.println(current_input_time - m_last_input_time);
+    // Serial.print(F("\nCalculating from current_rpms="));
+    // Serial.print(current_rpms);
+    // Serial.print(F("current_input_time="));
+    // Serial.print(current_input_time);
+    // Serial.print(F("m_last_input_time="));
+    // Serial.print(m_last_input_time);
+    // Serial.print(F("elapsed="));
+    // Serial.println(current_input_time - m_last_input_time);
     rpm = ceil(((float)current_rpms / ((float)(current_input_time - m_last_input_time) / (1000.0 * 60.0) ) ));
     m_last_input_time = current_input_time;
   }

@@ -23,7 +23,7 @@ void ThrottleSense::run(uint32_t now) {
 }
 
 void ThrottleSense::populate_log_buffer() {
-  strcpy(logBuffer,String(m_level,6).c_str());
+  strcpy(logBuffer,String(m_level,2).c_str());
   strcat(logBuffer,"\t");
   strcat(logBuffer,String(m_input_level).c_str());
 }

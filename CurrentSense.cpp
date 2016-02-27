@@ -25,7 +25,7 @@ void CurrentSense::run(uint32_t now) {
 }
 
 void CurrentSense::populate_log_buffer() {
-  strcpy(logBuffer,String(m_amps,6).c_str());
+  strcpy(logBuffer,String(m_amps,2).c_str());
   strcat(logBuffer,"\t");
   strcat(logBuffer,String(m_input_value).c_str());
 }
@@ -74,6 +74,9 @@ int16_t CurrentSense::readInputValue(uint32_t now) {
       {34007,879},
       {35007,889},
       {36007,1899},
+      {37007,4899},
+      {38007,5899},
+      {39007,6899}
     };
     for(int i = 0;i < sizeof(test_data) / sizeof(test_data[0]);i++) {
       uint32_t test_time = pgm_read_dword_near((uint16_t)&test_data[i][0]);

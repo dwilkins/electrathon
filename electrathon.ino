@@ -6,9 +6,9 @@
 #include "MotorControl.hpp"
 CurrentSense current_sense(0x19,100);
 ThrottleSense throttle_sense(0x18,100);
-SpeedSense speed_sense(2,26.0);
+SpeedSense speed_sense(2,62.8);
 
-MotorControl motor_control(0x20,&current_sense,&throttle_sense);
+MotorControl motor_control(0x20,&current_sense,&throttle_sense,&speed_sense);
 Task *tasks[] = { &current_sense, &throttle_sense, &speed_sense, &motor_control };
 
 TaskScheduler sched(tasks,4);

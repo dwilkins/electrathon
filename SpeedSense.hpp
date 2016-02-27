@@ -42,6 +42,7 @@ public:
     m_rpm = m_old_rpm = 0.0;
     m_last_input_time = 0;
     m_wheel_circumference_in_miles = m_wheel_circumference / 63360.0;
+    m_top_speed = 40.0;
   }
   virtual ~SpeedSense();
 
@@ -50,6 +51,7 @@ public:
   virtual void init(RunMode mode);
 
   float getSpeed() { return m_speed; };
+  float getRelativeSpeed() { return m_speed / m_top_speed;}
   void setRate(uint32_t rate) {
     m_rate = rate;
   };
@@ -68,7 +70,7 @@ private:
   float m_wheel_circumference_in_miles;
   float m_speed;
   float m_old_speed;
-
+  float m_top_speed;
   uint32_t m_rate; // In milliseconds
   uint32_t m_last_input_time;
   void populate_log_buffer();
