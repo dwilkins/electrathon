@@ -7,11 +7,6 @@ void CurrentSense::init(RunMode mode) {
   setLogTime(millis());
 
   Task::init(mode);
-
-  if(mode == Task::RunMode::production) {
-    ads.setGain(GAIN_SIXTEEN);    // 16x gain  +/- 0.256V  1 bit = 0.125mV  0.0078125mV
-    ads.begin();
-  }
 }
 
 CurrentSense::~CurrentSense() {}
@@ -48,7 +43,8 @@ void CurrentSense::processInputValue(uint32_t now) {
 int16_t CurrentSense::readInputValue(uint32_t now) {
   int16_t input_value = m_input_value;
   if(runMode == Task::RunMode::production) {
-     input_value = ads.readADC_Differential_0_1();  //spicer
+    analogReference(INTERNAL1V1);
+    input_value = analogRead(A3);
   } else if(runMode == Task::RunMode::test) {
     //
     // Storing the test values in PROGMEM saves some space

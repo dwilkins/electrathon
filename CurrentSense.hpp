@@ -25,7 +25,6 @@
 #define CURRENT_SENSE_HPP
 #include <Wire.h>
 #include "Task.hpp"
-#include "Adafruit_ADS1015.h"
 
 class CurrentSense : public TimedTask {
 public:
@@ -80,7 +79,6 @@ private:
   uint32_t m_rate; // In milliseconds
   uint32_t m_i2c_addr;
   uint32_t m_last_input_time;
-  Adafruit_ADS1115 ads;
 
   void populate_log_buffer();
 };

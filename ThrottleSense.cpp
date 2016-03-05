@@ -42,38 +42,39 @@ int16_t ThrottleSense::readInputValue(uint32_t now) {
   int16_t input_level = m_input_level;
 
   if(runMode == Task::RunMode::production) {
-     int16_t val = analogRead(0); // spicer hack
-     int throttle = map(val,185,620,0,100);
-     if (throttle < 0)  throttle = 0;
-     input_level = throttle;
+    analogReference(DEFAULT);
+    int16_t val = analogRead(0); // spicer hack
+    int throttle = map(val,185,620,0,100);
+    if (throttle < 0)  throttle = 0;
+    input_level = throttle;
   } else if(runMode == Task::RunMode::test) {
     static const PROGMEM uint32_t test_data[][2] = {
       {0,0},
-      {6000,25},
-      {10000,29},
-      {11000,33},
-      {16000,35},
-      {20000,33},
-      {21000,29},
-      {23000,200},
-      {25000,300},
-      {27000,400},
-      {29000,500},
-      {31000,600},
-      {33000,700},
-      {35000,800},
-      {37000,900},
-      {39000,1000},
-      {41000,1024},
-      {43000,900},
-      {45000,800},
-      {47000,700},
-      {49000,600},
-      {51000,500},
-      {53000,400},
-      {55000,300},
-      {57000,200},
-      {59000,100},
+      {6000,1},
+      {10000,1},
+      {11000,1},
+      {16000,1},
+      {20000,1},
+      {21000,20},
+      {23000,20},
+      {25000,20},
+      {27000,30},
+      {29000,30},
+      {31000,30},
+      {33000,30},
+      {35000,30},
+      {37000,30},
+      {39000,30},
+      {41000,30},
+      {43000,30},
+      {45000,30},
+      {47000,30},
+      {49000,30},
+      {51000,40},
+      {53000,40},
+      {55000,30},
+      {57000,20},
+      {59000,10},
       {61000,0}
     };
     for(int i = 0;i < sizeof(test_data) / sizeof(test_data[0]);i++) {
