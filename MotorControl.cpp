@@ -1,9 +1,14 @@
 #include "MotorControl.hpp"
+
 void MotorControl::init(RunMode mode) {
-  // do some stuff to initialize it
   populate_log_buffer();
   setLogTime(millis());
   Task::init(mode);
+  
+  if(mode == Task::RunMode::production) {
+    esc.attach(7);
+    dac.begin(0x60);  // banggood version
+  }  
 }
 
 MotorControl::~MotorControl() {}
@@ -124,8 +129,9 @@ int MotorControl::transmission_level_from_speed(int increment) {
 //
 // Turn a raw level into an adjusted level so that we're not
 // making micro adjustments to the transmission (unless we want to)
-
 //
+//
+
 int MotorControl::adjusted_transmission_level(int level,int increment) {
   int new_level = ((level / m_transmission_level_resolution)  + increment) * m_transmission_level_resolution;
   return(new_level > m_max_transmission_level ?
@@ -133,16 +139,15 @@ int MotorControl::adjusted_transmission_level(int level,int increment) {
          (new_level < 0 ? 0 : new_level));
 }
 
-
-
 void MotorControl::change_motor_level(int motor_level) {
   m_current_motor_level = motor_level;
+  esc.write(motor_level);
 }
+
 void MotorControl::change_transmission_level(int transmission_level) {
   m_current_transmission_level = transmission_level;
+  dac.setVoltage(transmission_level,false);  //spicer
 }
-
-
 
 bool MotorControl::addCommand(uint32_t when, int motor_level,int transmission_level) {
   bool overwrite = m_commands.commands[m_commands.next_free].completed;
@@ -272,7 +277,7 @@ uint8_t MotorControl::pendingCommands(uint32_t after_when) {
 // needed.
 //
 void MotorControl::populate_log_buffer() {
-  static const char tab_str[] PROGMEM = "\t";
+  static const char tab_str[] PROGMEM = ",";
   strcpy(logBuffer,String(m_current_motor_level).c_str());
   strcat_P(logBuffer,tab_str);
   strcat(logBuffer,String(m_target_motor_level).c_str());

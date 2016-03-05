@@ -26,12 +26,12 @@
 
 void TaskScheduler::run() {
   {
-    Serial.print("millis");
+    Serial1.print("millis");
     for (int t = 0; t < numTasks; t++) {
-      Serial.print("\t");
-      Serial.print(tasks[t]->getLogHeader());
+      Serial1.print(",");
+      Serial1.print(tasks[t]->getLogHeader());
     }
-  Serial.println("");
+  Serial1.println("");
   }
   while (1) {
     uint32_t now = millis();
@@ -43,12 +43,12 @@ void TaskScheduler::run() {
       log_now |= tasks[t]->canLog(now);
     }
     if(log_now) {
-      Serial.print(now);
+      Serial1.print(now);
       for (int t = 0; t < numTasks; t++) {
-        Serial.print("\t");
-        Serial.print(tasks[t]->getLogData(now));
+        Serial1.print(",");
+        Serial1.print(tasks[t]->getLogData(now));
       }
-      Serial.println("");
+      Serial1.println("");
     }
   }
 }

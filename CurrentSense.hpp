@@ -27,8 +27,6 @@
 #include "Task.hpp"
 #include "Adafruit_ADS1015.h"
 
-
-
 class CurrentSense : public TimedTask {
 public:
   CurrentSense(uint32_t i2c_addr,

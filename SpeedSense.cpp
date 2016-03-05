@@ -35,7 +35,7 @@ void SpeedSense::run(uint32_t now) {
 
 void SpeedSense::populate_log_buffer() {
   static const char mph_str[] PROGMEM = "mph";
-  static const char rpm_str[] PROGMEM = "rpm\t";
+  static const char rpm_str[] PROGMEM = "rpm";
   strcat(logBuffer,String(m_rpm).c_str());
   strcat_P(logBuffer,rpm_str);
   strcpy(logBuffer,String(m_speed,2).c_str());
@@ -44,7 +44,7 @@ void SpeedSense::populate_log_buffer() {
 
 
 const char *SpeedSense::getLogHeader() {
-  return "rpm\tspeed";
+  return "rpm,speed";
 }
 
 void SpeedSense::processInputValue(uint32_t now) {
@@ -106,7 +106,7 @@ int16_t SpeedSense::readInputValue(uint32_t now) {
     // Serial.print(m_last_input_time);
     // Serial.print(F("elapsed="));
     // Serial.println(current_input_time - m_last_input_time);
-    rpm = ceil(((float)current_rpms / ((float)(current_input_time - m_last_input_time) / (1000.0 * 60.0) ) ));
+    rpm = ceil(((float)current_rpms / ((float)(current_input_time - m_last_input_time) / (1000.0 * 30.0) ) )); // spicer
     m_last_input_time = current_input_time;
   }
   return rpm;

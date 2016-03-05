@@ -24,10 +24,13 @@
 #ifndef MOTOR_CONTROL_HPP
 #define MOTOR_CONTROL_HPP
 #include "Task.hpp"
-
 #include "CurrentSense.hpp"
 #include "ThrottleSense.hpp"
 #include "SpeedSense.hpp"
+#include <wire.h>
+#include "Adafruit_MCP4725.h"
+
+#include <Servo.h>  // spicer
 
 #define MOTOR_COMMAND_COUNT ((int8_t)10)
 #define TARGET_AMPS 50.0
@@ -64,8 +67,8 @@ public:
     m_amps_resolution = 0.5;
     m_throttle_resolution = 0.5;
     m_throttle_threshold = 75.0;
-    m_max_motor_level = 1024;
-    m_max_transmission_level = 1024;
+    m_max_motor_level = 179;
+    m_max_transmission_level = 4095;
     m_motor_level_resolution = ceil(m_max_motor_level / 30);
     m_transmission_level_resolution = ceil(m_max_transmission_level / 30);
   }
@@ -146,8 +149,11 @@ private:
 
   int m_motor_level_resolution;
   int m_transmission_level_resolution;
+  
+  Servo esc;             //spicer
+  Adafruit_MCP4725 dac;  //spicer
 
-  void populate_log_buffer();
+  void populate_log_buffer(); 
 
 };
 
