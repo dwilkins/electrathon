@@ -27,7 +27,7 @@
 #include "CurrentSense.hpp"
 #include "ThrottleSense.hpp"
 #include "SpeedSense.hpp"
-#include <wire.h>
+#include <Wire.h>
 #include "Adafruit_MCP4725.h"
 
 #include <Servo.h>  // spicer
@@ -149,11 +149,11 @@ private:
 
   int m_motor_level_resolution;
   int m_transmission_level_resolution;
-  
+
   Servo esc;             //spicer
   Adafruit_MCP4725 dac;  //spicer
 
-  void populate_log_buffer(); 
+  void populate_log_buffer();
 
 };
 

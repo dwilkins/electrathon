@@ -27,9 +27,12 @@
 void TaskScheduler::run() {
   {
     Serial1.print("millis");
+    Serial.print("millis");
     for (int t = 0; t < numTasks; t++) {
       Serial1.print(",");
       Serial1.print(tasks[t]->getLogHeader());
+      Serial.print(",");
+      Serial.print(tasks[t]->getLogHeader());
     }
   Serial1.println("");
   }
@@ -44,11 +47,15 @@ void TaskScheduler::run() {
     }
     if(log_now) {
       Serial1.print(now);
+      Serial.print(now);
       for (int t = 0; t < numTasks; t++) {
         Serial1.print(",");
         Serial1.print(tasks[t]->getLogData(now));
+        Serial.print(",");
+        Serial.print(tasks[t]->getLogData(now));
       }
       Serial1.println("");
+      Serial.println("");
     }
   }
 }

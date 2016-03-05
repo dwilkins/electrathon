@@ -4,11 +4,11 @@ void MotorControl::init(RunMode mode) {
   populate_log_buffer();
   setLogTime(millis());
   Task::init(mode);
-  
+
   if(mode == Task::RunMode::production) {
     esc.attach(7);
     dac.begin(0x60);  // banggood version
-  }  
+  }
 }
 
 MotorControl::~MotorControl() {}
@@ -294,4 +294,3 @@ void MotorControl::populate_log_buffer() {
 const char *MotorControl::getLogHeader() {
   return "current_motor\ttarget_motor\tcurrent_gear\ttarget_gear\tamps\tthrottle";
 }
-

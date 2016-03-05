@@ -5,17 +5,12 @@ void CurrentSense::init(RunMode mode) {
   // do some stuff to initialize it
   populate_log_buffer();
   setLogTime(millis());
-  
+
   Task::init(mode);
-  
+
   if(mode == Task::RunMode::production) {
     ads.setGain(GAIN_SIXTEEN);    // 16x gain  +/- 0.256V  1 bit = 0.125mV  0.0078125mV
     ads.begin();
-    
-    Serial1.println("alpha pre read");
-    int xxx = ads.readADC_Differential_0_1();  //spicer
-    Serial1.print("xxx = ");
-    Serial1.println(xxx);
   }
 }
 
@@ -53,9 +48,7 @@ void CurrentSense::processInputValue(uint32_t now) {
 int16_t CurrentSense::readInputValue(uint32_t now) {
   int16_t input_value = m_input_value;
   if(runMode == Task::RunMode::production) {
-     Serial1.println("baker");
      input_value = ads.readADC_Differential_0_1();  //spicer
-     Serial1.println("charlie");
   } else if(runMode == Task::RunMode::test) {
     //
     // Storing the test values in PROGMEM saves some space
@@ -90,7 +83,7 @@ int16_t CurrentSense::readInputValue(uint32_t now) {
       {39007,6899}
     };
 
-    
+
     for(int i = 0;i < sizeof(test_data) / sizeof(test_data[0]);i++) {
       uint32_t test_time = pgm_read_dword_near((uint16_t)&test_data[i][0]);
       uint32_t test_value = pgm_read_dword_near((uint16_t)&test_data[i][1]);

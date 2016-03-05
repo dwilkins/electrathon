@@ -19,7 +19,7 @@ Task *tasks[] = { &current_sense, &throttle_sense, &speed_sense, &motor_control 
 TaskScheduler sched(tasks,4);
 
 void setup() {
-  
+
   Task::RunMode modetest = Task::RunMode::test;
   Task::RunMode modeprod = Task::RunMode::production;
 

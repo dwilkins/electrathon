@@ -40,15 +40,11 @@ void ThrottleSense::processInputValue(uint32_t now) {
 
 int16_t ThrottleSense::readInputValue(uint32_t now) {
   int16_t input_level = m_input_level;
-  
+
   if(runMode == Task::RunMode::production) {
      int16_t val = analogRead(0); // spicer hack
      int throttle = map(val,185,620,0,100);
      if (throttle < 0)  throttle = 0;
-     Serial1.print("val: ");
-     Serial1.print(val);
-     Serial1.print(", throttle: ");
-     Serial1.println(throttle);
      input_level = throttle;
   } else if(runMode == Task::RunMode::test) {
     static const PROGMEM uint32_t test_data[][2] = {
