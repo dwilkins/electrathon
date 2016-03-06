@@ -42,7 +42,7 @@ public:
     m_rpm = m_old_rpm = 0.0;
     m_last_input_time = 0;
     m_wheel_circumference_in_miles = m_wheel_circumference / 63360.0;
-    m_top_speed = 40.0;
+    m_top_speed = 42.0;
   }
   virtual ~SpeedSense();
 

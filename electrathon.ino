@@ -30,7 +30,7 @@ void setup() {
   current_sense.init(modeprod);
   throttle_sense.init(modeprod);
   speed_sense.init(modeprod);
-  motor_control.init(modetest);
+  motor_control.init(modeprod);
 }
 
 

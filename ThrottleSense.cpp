@@ -35,18 +35,39 @@ const char *ThrottleSense::getLogHeader() {
 
 
 void ThrottleSense::processInputValue(uint32_t now) {
-  m_level = ((float)(m_input_max - (m_input_max - m_input_level)) / (float)m_input_max) * 100.0;
+  m_level = ((float)(m_input_size - (m_input_size - m_input_level)) / (float)m_input_size) * 100.0;
 }
 
 int16_t ThrottleSense::readInputValue(uint32_t now) {
   int16_t input_level = m_input_level;
 
   if(runMode == Task::RunMode::production) {
+    uint32_t input_level_average = 0;
     analogReference(DEFAULT);
-    int16_t val = analogRead(0); // spicer hack
-    int throttle = map(val,185,620,0,100);
-    if (throttle < 0)  throttle = 0;
-    input_level = throttle;
+    if(m_input_buffer_position > 5) {
+      m_input_buffer_position = 0;
+    }
+
+    m_input_buffer[m_input_buffer_position] = analogRead(0);
+    m_input_buffer[m_input_buffer_position] = analogRead(0);
+    m_input_buffer[m_input_buffer_position] = analogRead(0);
+    m_input_buffer[m_input_buffer_position] = analogRead(0);
+    m_input_buffer[m_input_buffer_position] = analogRead(0);
+    m_input_buffer[m_input_buffer_position] = analogRead(0);
+    m_input_buffer[m_input_buffer_position] = analogRead(0);
+    m_input_buffer_position++;
+    if(m_input_buffer_position > 5) {
+      m_input_buffer_position = 0;
+    }
+    for(uint8_t i=0;i<5;i++) {
+      input_level_average += m_input_buffer[i];
+    }
+    input_level = (input_level_average / 5);
+    if(input_level > m_input_min) {
+      input_level -= m_input_min;
+    } else {
+      input_level = 0;
+    }
   } else if(runMode == Task::RunMode::test) {
     static const PROGMEM uint32_t test_data[][2] = {
       {0,0},

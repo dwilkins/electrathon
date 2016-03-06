@@ -67,8 +67,9 @@ public:
     m_amps_resolution = 0.5;
     m_throttle_resolution = 0.5;
     m_throttle_threshold = 75.0;
-    m_max_motor_level = 179;
+    m_max_motor_level = 179 - 46;
     m_max_transmission_level = 4095;
+    m_next_evaluation = 0;
     m_motor_level_resolution = ceil(m_max_motor_level / 30);
     m_transmission_level_resolution = ceil(m_max_transmission_level / 30);
   }
@@ -136,7 +137,7 @@ private:
   int m_target_motor_level;
   int m_current_transmission_level;
   int m_target_transmission_level;
-
+  uint32_t m_next_evaluation;
   int m_max_motor_level;
   int m_max_transmission_level;
 

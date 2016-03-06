@@ -8,6 +8,9 @@ void MotorControl::init(RunMode mode) {
   if(mode == Task::RunMode::production) {
     esc.attach(7);
     dac.begin(0x60);  // banggood version
+    delay(1);
+    dac.setVoltage(0,false);  //spicer
+    esc.write(0);
   }
 }
 
@@ -26,7 +29,9 @@ bool MotorControl::canRun(uint32_t now) {
 //
 void MotorControl::run(uint32_t now) {
   bool values_changed = readInputValues(now);
-  if(values_changed) {
+  if(values_changed || now > m_next_evaluation) {
+    values_changed = true;
+    m_next_evaluation = now + 500;
     processInputValues(now);
   }
   values_changed |= processCommands(now);
@@ -65,7 +70,7 @@ void MotorControl::processInputValues(uint32_t now) {
   int motor_level = ceil((m_throttle / 100.0) * m_max_motor_level);
   int motor_level_distance = abs(motor_level - m_target_motor_level);
   if(motor_level_distance < m_motor_level_resolution) {
-    return;
+    motor_level = m_target_motor_level;
   }
   if(m_throttle < m_throttle_threshold) {
     int new_transmission_level = 0;
@@ -74,31 +79,22 @@ void MotorControl::processInputValues(uint32_t now) {
       new_transmission_level = transmission_level_from_speed(-1);
       command_time = now;
     } else {
-      new_transmission_level = transmission_level_from_speed();
+      new_transmission_level = transmission_level_from_speed(0);
     }
     // TODO: handle slowing down and shifting down...
     addCommand(now,motor_level,new_transmission_level);
   } else {
     if(m_amps > TARGET_AMPS &&
-       (m_target_transmission_level > 0) &&
-       pendingCommands(now + 500) == 0) {
+       pendingCommands(now) == 0) {
       addCommand(now,motor_level, adjusted_transmission_level(m_target_transmission_level,-1));
-      addCommand(now + 1500,motor_level, adjusted_transmission_level(m_target_transmission_level,-1));
     } else if(m_amps < TARGET_AMPS &&
               m_current_transmission_level == m_target_transmission_level &&
               pendingCommands() == 0) {
-      for(int8_t i=0;(m_amps + (TARGET_AMPS / 5.0) * (float)i) < TARGET_AMPS,i<3;i++) {
-        addCommand(now+(1000 * i),motor_level, adjusted_transmission_level(m_target_transmission_level,1 + i));
-      }
+      addCommand(now,motor_level, transmission_level_from_speed(1));
     } else {
-    }
-    int motor_level_step = motor_level_distance > m_motor_level_resolution ? motor_level_distance / 3 : motor_level_distance;
-    int target_motor_level = m_target_motor_level;
-    if(motor_level < m_target_motor_level) {
-      motor_level_step = -motor_level_step;
-    }
-    for(int i = 0;i<3;i++) {
-      addCommand(now + (500 * i),target_motor_level += motor_level_step,m_current_transmission_level);
+      if(m_amps > TARGET_AMPS) {
+        addCommand(now,motor_level, transmission_level_from_speed(-1));
+      }
     }
   }
 }
@@ -123,7 +119,7 @@ bool MotorControl::processCommands(uint32_t now) {
 // speed. Useful for low-throttle situations
 //
 int MotorControl::transmission_level_from_speed(int increment) {
-  return(adjusted_transmission_level(m_speed_sense->getRelativeSpeed() * m_max_transmission_level),increment);
+  return(adjusted_transmission_level(m_speed_sense->getRelativeSpeed() * m_max_transmission_level,increment));
 }
 
 //
@@ -141,6 +137,15 @@ int MotorControl::adjusted_transmission_level(int level,int increment) {
 
 void MotorControl::change_motor_level(int motor_level) {
   m_current_motor_level = motor_level;
+  if(motor_level < 10) {
+    motor_level = 0;
+  }
+  if(motor_level > 10) {
+    motor_level += 36;
+  }
+  if(motor_level > 179) {
+    motor_level = 179;
+  }
   esc.write(motor_level);
 }
 
@@ -173,6 +178,23 @@ bool MotorControl::addCommand(uint32_t when, int motor_level,int transmission_le
   m_commands.commands[index].motor_level = motor_level;
   m_commands.commands[index].transmission_level = transmission_level;
   m_commands.commands[index].completed = false;
+
+  index++;
+  if(index > MOTOR_COMMAND_COUNT) {
+    index = 0;
+  }
+  for(int8_t i=index;i < MOTOR_COMMAND_COUNT;i++) {
+    if(m_commands.commands[i].completed == false) {
+      m_commands.commands[i].completed = true;
+    }
+  }
+  if(index < 0) {
+    for(int8_t i=0;i < index;i++) {
+      if(m_commands.commands[i].completed == true) {
+        m_commands.commands[i].completed = true;
+      }
+    }
+  }
   increment_next_free();
   return !overwrite;
 }
@@ -225,7 +247,7 @@ bool MotorControl::readInputValues(uint32_t now) {
   m_samples.samples[m_samples.next_free].amps = amps;
   m_samples.samples[m_samples.next_free].throttle_level = throttle;
   m_samples.last_input_time = now;
-  m_samples.next_input_time = now + 100;  // TODO: make this better
+  m_samples.next_input_time = now + 50;  // TODO: make this better
   m_samples.next_free++;
   if(m_samples.next_free >= max_samples) {
     m_samples.next_free = 0;
@@ -278,17 +300,25 @@ uint8_t MotorControl::pendingCommands(uint32_t after_when) {
 //
 void MotorControl::populate_log_buffer() {
   static const char tab_str[] PROGMEM = ",";
-  strcpy(logBuffer,String(m_current_motor_level).c_str());
+  strcpy(logBuffer,"*");
+  strcat(logBuffer,String(m_current_motor_level).c_str());
+  strcat(logBuffer,"*");
   strcat_P(logBuffer,tab_str);
   strcat(logBuffer,String(m_target_motor_level).c_str());
   strcat_P(logBuffer,tab_str);
+  strcat(logBuffer,"x");
   strcat(logBuffer,String(m_current_transmission_level).c_str());
+  strcat(logBuffer,"x");
   strcat_P(logBuffer,tab_str);
+  strcat(logBuffer,"x");
   strcat(logBuffer,String(m_target_transmission_level).c_str());
+  strcat(logBuffer,"x");
   strcat_P(logBuffer,tab_str);
   strcat(logBuffer,String(m_amps,2).c_str());
   strcat_P(logBuffer,tab_str);
+  strcat(logBuffer,"t");
   strcat(logBuffer,String(m_throttle,2).c_str());
+  strcat(logBuffer,"t");
 }
 
 const char *MotorControl::getLogHeader() {

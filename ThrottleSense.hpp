@@ -32,8 +32,8 @@ public:
   ThrottleSense(uint32_t pin,
                 uint32_t rate = 200,
                 uint32_t log_rate = 10000, // log every 10 seconds regardless
-                uint32_t input_min = 0,
-                uint32_t input_max = 1024,
+                uint32_t input_min = 185,
+                uint32_t input_max = 620,
                 float output_min = 0.0,
                 float output_max = 100.0) : TimedTask(millis()),
                                             m_pin(pin),
@@ -46,6 +46,8 @@ public:
     m_level = 0.0;
     m_old_level = 0.0;
     m_last_input_time = 0;
+    m_input_buffer_position = 0;
+    m_input_size = m_input_max - m_input_min;
     // Do some setup stuff?
   }
 
@@ -67,8 +69,12 @@ private:
   uint32_t m_pin;
   uint32_t m_input_min;
   uint32_t m_input_max;
+  uint32_t m_input_size;
   float m_output_min;
   float m_output_max;
+
+  uint16_t m_input_buffer[20];
+  uint8_t m_input_buffer_position;
 
   uint32_t m_last_input_time;
   void populate_log_buffer();

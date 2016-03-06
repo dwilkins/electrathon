@@ -32,7 +32,7 @@ public:
                uint32_t rate = 2000,
                uint32_t log_rate = 10000,
                uint32_t input_min = 0,
-               uint32_t input_max = 65535,
+               uint32_t input_max = 1023,
                float output_min = 0.0,
                float output_max = 100.0
                ) : TimedTask(millis()),
@@ -46,6 +46,7 @@ public:
     m_amps = 0.0;
     m_old_amps = 0.0;
     m_last_input_time = 0;
+    m_input_buffer_position = 0;
     // Do some setup stuff?
   }
   virtual ~CurrentSense();
@@ -79,6 +80,9 @@ private:
   uint32_t m_rate; // In milliseconds
   uint32_t m_i2c_addr;
   uint32_t m_last_input_time;
+
+  uint16_t m_input_buffer[20];
+  uint8_t m_input_buffer_position;
 
   void populate_log_buffer();
 };

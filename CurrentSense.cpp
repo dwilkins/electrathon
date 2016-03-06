@@ -36,16 +36,46 @@ const char *CurrentSense::getLogHeader() {
 }
 
 void CurrentSense::processInputValue(uint32_t now) {
-   m_amps = ((float) m_input_value * .0078125F);
+  //   m_amps = ((float) m_input_value * .0078125F);
+  m_amps = ((float) m_input_value);
 }
 
 
 int16_t CurrentSense::readInputValue(uint32_t now) {
   int16_t input_value = m_input_value;
   if(runMode == Task::RunMode::production) {
+    // uint32_t input_level_average = 0;
+    // if(m_input_buffer_position > 20) {
+    //   m_input_buffer_position = 0;
+    // }
     analogReference(INTERNAL1V1);
-    input_value = analogRead(A3);
-  } else if(runMode == Task::RunMode::test) {
+    input_value = analogRead(3);
+    input_value = analogRead(3);
+    input_value = analogRead(3);
+    input_value = analogRead(3);
+    input_value = analogRead(3);
+    input_value = analogRead(3);
+    input_value = analogRead(3);
+    input_value = analogRead(3);
+    input_value = analogRead(3);
+    // m_input_buffer[m_input_buffer_position] = analogRead(0);
+    // m_input_buffer_position++;
+    // if(m_input_buffer_position > 20) {
+    //   m_input_buffer_position = 0;
+    // }
+    // for(uint8_t i=0;i<20;i++) {
+    //   input_level_average += m_input_buffer[i];
+    // }
+    // input_value = (input_level_average / 20);
+    // if(input_value > m_input_min) {
+    //   input_value -= m_input_min;
+    // } else {
+    //   input_value = 0;
+    // }
+    // if(input_value > m_input_max) {
+    //   input_value = m_input_max;
+    // }
+   } else if(runMode == Task::RunMode::test) {
     //
     // Storing the test values in PROGMEM saves some space
     // but makes you have to pull the values out by hand
