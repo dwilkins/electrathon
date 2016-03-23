@@ -28,14 +28,14 @@ void ThrottleSense::populate_log_buffer() {
   strcat(logBuffer,String(m_input_level).c_str());
 }
 
-
 const char *ThrottleSense::getLogHeader() {
-  return "current_throttle_level\tthrottle_input_level";
+  return "current_throttle_level,throttle_input_level";
 }
 
-
 void ThrottleSense::processInputValue(uint32_t now) {
-  m_level = ((float)(m_input_size - (m_input_size - m_input_level)) / (float)m_input_size) * 100.0;
+//  m_level = ((float)(m_input_size - (m_input_size - m_input_level)) / (float)m_input_size) * 100.0;
+
+  m_level =  (float) m_input_level / 100.0;
 }
 
 int16_t ThrottleSense::readInputValue(uint32_t now) {
@@ -43,31 +43,20 @@ int16_t ThrottleSense::readInputValue(uint32_t now) {
 
   if(runMode == Task::RunMode::production) {
     uint32_t input_level_average = 0;
-    analogReference(DEFAULT);
-    if(m_input_buffer_position > 5) {
-      m_input_buffer_position = 0;
+    
+    int val = analogRead(0);
+
+   // Serial1.println(val);
+
+    input_level = map(val,0,819,0,100);  /// seems to work
+
+    if (input_level > 100) {
+        input_level = 100;
     }
 
-    m_input_buffer[m_input_buffer_position] = analogRead(0);
-    m_input_buffer[m_input_buffer_position] = analogRead(0);
-    m_input_buffer[m_input_buffer_position] = analogRead(0);
-    m_input_buffer[m_input_buffer_position] = analogRead(0);
-    m_input_buffer[m_input_buffer_position] = analogRead(0);
-    m_input_buffer[m_input_buffer_position] = analogRead(0);
-    m_input_buffer[m_input_buffer_position] = analogRead(0);
-    m_input_buffer_position++;
-    if(m_input_buffer_position > 5) {
-      m_input_buffer_position = 0;
-    }
-    for(uint8_t i=0;i<5;i++) {
-      input_level_average += m_input_buffer[i];
-    }
-    input_level = (input_level_average / 5);
-    if(input_level > m_input_min) {
-      input_level -= m_input_min;
-    } else {
-      input_level = 0;
-    }
+   // Serial.print("throttle:");
+   // Serial.println(val);
+      
   } else if(runMode == Task::RunMode::test) {
     static const PROGMEM uint32_t test_data[][2] = {
       {0,0},

@@ -1,13 +1,23 @@
 #include "CurrentSense.hpp"
 
-void CurrentSense::init(RunMode mode) {
+void CurrentSense::init(RunMode mode) { 
 
   // do some stuff to initialize it
   populate_log_buffer();
   setLogTime(millis());
 
   Task::init(mode);
+
+  if (mode == Task::RunMode::production) {
+
+   ads.setGain(GAIN_EIGHT);        // 015625mV   8x gain   +/- 0.512V  1 bit =  0.015625mV
+    
+   // ads.setGain(GAIN_SIXTEEN);    // 16x gain  +/- 0.256V  1 bit = 0.0078125mV
+   // ads.setGain(GAIN_TWOTHIRDS);  // 2/3x gain +/- 6.144V  1 bit = 0.1875mV (default)  
+    ads.begin();
+  }
 }
+
 
 CurrentSense::~CurrentSense() {}
 
@@ -30,52 +40,31 @@ void CurrentSense::populate_log_buffer() {
   strcat(logBuffer,String(m_input_value).c_str());
 }
 
-
 const char *CurrentSense::getLogHeader() {
   return "current_amps,amps_input_value";
 }
 
 void CurrentSense::processInputValue(uint32_t now) {
-  //   m_amps = ((float) m_input_value * .0078125F);
-  m_amps = ((float) m_input_value);
+   // 50mv over 200amps  = .25mv per amp so multiply x4;
+   // m_amps = (double) m_input_value * 0.0078125F  * 4.0F;   // 16x gain
+
+    m_amps = (float) m_input_value * 0.015625F  *  4.0F;   // 8x gain
 }
 
 
 int16_t CurrentSense::readInputValue(uint32_t now) {
   int16_t input_value = m_input_value;
+  
   if(runMode == Task::RunMode::production) {
-    // uint32_t input_level_average = 0;
-    // if(m_input_buffer_position > 20) {
-    //   m_input_buffer_position = 0;
-    // }
-    analogReference(INTERNAL1V1);
-    input_value = analogRead(3);
-    input_value = analogRead(3);
-    input_value = analogRead(3);
-    input_value = analogRead(3);
-    input_value = analogRead(3);
-    input_value = analogRead(3);
-    input_value = analogRead(3);
-    input_value = analogRead(3);
-    input_value = analogRead(3);
-    // m_input_buffer[m_input_buffer_position] = analogRead(0);
-    // m_input_buffer_position++;
-    // if(m_input_buffer_position > 20) {
-    //   m_input_buffer_position = 0;
-    // }
-    // for(uint8_t i=0;i<20;i++) {
-    //   input_level_average += m_input_buffer[i];
-    // }
-    // input_value = (input_level_average / 20);
-    // if(input_value > m_input_min) {
-    //   input_value -= m_input_min;
-    // } else {
-    //   input_value = 0;
-    // }
-    // if(input_value > m_input_max) {
-    //   input_value = m_input_max;
-    // }
-   } else if(runMode == Task::RunMode::test) {
+    
+      input_value = ads.readADC_Differential_2_3(); // spicer
+
+    //  input_value = ads.readADC_SingleEnded(1);
+    
+  //  Serial.print("adc read: ");
+  //  Serial.println(input_value);
+
+  } else if(runMode == Task::RunMode::test) {
     //
     // Storing the test values in PROGMEM saves some space
     // but makes you have to pull the values out by hand

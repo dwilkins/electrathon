@@ -32,8 +32,8 @@ public:
   ThrottleSense(uint32_t pin,
                 uint32_t rate = 200,
                 uint32_t log_rate = 10000, // log every 10 seconds regardless
-                uint32_t input_min = 185,
-                uint32_t input_max = 620,
+                uint32_t input_min = 0,
+                uint32_t input_max = 185,
                 float output_min = 0.0,
                 float output_max = 100.0) : TimedTask(millis()),
                                             m_pin(pin),

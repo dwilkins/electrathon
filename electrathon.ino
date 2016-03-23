@@ -25,7 +25,7 @@ void setup() {
 
   Serial.begin(57600);
   Serial1.begin(57600);
-  Serial.print("hello");
+  Serial.print("Electrathon Brushed Motor");
 
   current_sense.init(modeprod);
   throttle_sense.init(modeprod);

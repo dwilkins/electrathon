@@ -24,6 +24,8 @@
 #ifndef CURRENT_SENSE_HPP
 #define CURRENT_SENSE_HPP
 #include <Wire.h>
+#include "Adafruit_ADS1015.h"
+
 #include "Task.hpp"
 
 class CurrentSense : public TimedTask {
@@ -32,9 +34,9 @@ public:
                uint32_t rate = 2000,
                uint32_t log_rate = 10000,
                uint32_t input_min = 0,
-               uint32_t input_max = 1023,
+               uint32_t input_max = 32768,
                float output_min = 0.0,
-               float output_max = 100.0
+               float output_max = 300.0
                ) : TimedTask(millis()),
                    m_rate(rate),
                    m_i2c_addr(i2c_addr),
@@ -84,6 +86,8 @@ private:
   uint16_t m_input_buffer[20];
   uint8_t m_input_buffer_position;
 
+  Adafruit_ADS1115 ads;
+  
   void populate_log_buffer();
 };
 

@@ -66,12 +66,12 @@ public:
     m_throttle = 0.0;
     m_amps_resolution = 0.5;
     m_throttle_resolution = 0.5;
-    m_throttle_threshold = 75.0;
+    m_throttle_threshold = 90.0;
     m_max_motor_level = 179 - 46;
     m_max_transmission_level = 4095;
     m_next_evaluation = 0;
-    m_motor_level_resolution = ceil(m_max_motor_level / 30);
-    m_transmission_level_resolution = ceil(m_max_transmission_level / 30);
+    m_motor_level_resolution = ceil(m_max_motor_level / 50);
+    m_transmission_level_resolution = ceil(m_max_transmission_level / 60);
   }
 
   virtual ~MotorControl();

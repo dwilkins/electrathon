@@ -6,7 +6,6 @@ void MotorControl::init(RunMode mode) {
   Task::init(mode);
 
   if(mode == Task::RunMode::production) {
-    esc.attach(7);
     dac.begin(0x60);  // banggood version
     delay(1);
     dac.setVoltage(0,false);  //spicer
@@ -27,11 +26,12 @@ bool MotorControl::canRun(uint32_t now) {
 // - Perform any commands that need to
 //   be handled now.
 //
+
 void MotorControl::run(uint32_t now) {
   bool values_changed = readInputValues(now);
   if(values_changed || now > m_next_evaluation) {
     values_changed = true;
-    m_next_evaluation = now + 500;
+    m_next_evaluation = now + 250;
     processInputValues(now);
   }
   values_changed |= processCommands(now);
@@ -72,27 +72,31 @@ void MotorControl::processInputValues(uint32_t now) {
   if(motor_level_distance < m_motor_level_resolution) {
     motor_level = m_target_motor_level;
   }
-  if(m_throttle < m_throttle_threshold) {
+  
+  if (m_throttle < m_throttle_threshold) {
     int new_transmission_level = 0;
     uint32_t command_time = 0;
-    if(m_amps > TARGET_AMPS) {
+    
+    if (m_amps > 60) {
       new_transmission_level = transmission_level_from_speed(-1);
       command_time = now;
     } else {
       new_transmission_level = transmission_level_from_speed(0);
     }
+    
     // TODO: handle slowing down and shifting down...
     addCommand(now,motor_level,new_transmission_level);
   } else {
-    if(m_amps > TARGET_AMPS &&
-       pendingCommands(now) == 0) {
+    if(m_amps > 60 && pendingCommands(now) == 0) {
       addCommand(now,motor_level, adjusted_transmission_level(m_target_transmission_level,-1));
-    } else if(m_amps < TARGET_AMPS &&
-              m_current_transmission_level == m_target_transmission_level &&
-              pendingCommands() == 0) {
-      addCommand(now,motor_level, transmission_level_from_speed(1));
+    } else if(m_amps < 30 ) {  // low load
+         if ( m_current_transmission_level == m_target_transmission_level && pendingCommands() == 0) {
+            if (m_throttle > .90) {
+               addCommand(now,motor_level, transmission_level_from_speed(1));
+            }
+         }
     } else {
-      if(m_amps > TARGET_AMPS) {
+      if (m_amps > 60) {
         addCommand(now,motor_level, transmission_level_from_speed(-1));
       }
     }
@@ -129,7 +133,9 @@ int MotorControl::transmission_level_from_speed(int increment) {
 //
 
 int MotorControl::adjusted_transmission_level(int level,int increment) {
+  
   int new_level = ((level / m_transmission_level_resolution)  + increment) * m_transmission_level_resolution;
+  
   return(new_level > m_max_transmission_level ?
          m_max_transmission_level :
          (new_level < 0 ? 0 : new_level));
@@ -137,17 +143,9 @@ int MotorControl::adjusted_transmission_level(int level,int increment) {
 
 void MotorControl::change_motor_level(int motor_level) {
   m_current_motor_level = motor_level;
-  if(motor_level < 10) {
-    motor_level = 0;
-  }
-  if(motor_level > 10) {
-    motor_level += 36;
-  }
-  if(motor_level > 179) {
-    motor_level = 179;
-  }
-  esc.write(motor_level);
+  // motor monitored but not controlled.
 }
+
 
 void MotorControl::change_transmission_level(int transmission_level) {
   m_current_transmission_level = transmission_level;
@@ -241,7 +239,9 @@ bool MotorControl::readInputValues(uint32_t now) {
   if(now < m_samples.next_input_time) {return false;}
 
   throttle = m_throttle_sense->getLevel();
-  amps = m_current_sense->getAmps();
+  
+  amps     = m_current_sense->getAmps();
+  
   // Shove these values into the array of samples.
   m_samples.samples[m_samples.next_free].sample_time = now;
   m_samples.samples[m_samples.next_free].amps = amps;
@@ -322,5 +322,5 @@ void MotorControl::populate_log_buffer() {
 }
 
 const char *MotorControl::getLogHeader() {
-  return "current_motor\ttarget_motor\tcurrent_gear\ttarget_gear\tamps\tthrottle";
+  return "current_motor,target_motor,current_gear,target_gear,amps,throttle";
 }

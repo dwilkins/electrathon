@@ -31,7 +31,7 @@ class SpeedSense : public TimedTask {
 public:
   SpeedSense(uint32_t pin,
              float wheel_circumference,
-             uint32_t rate = 2000,
+             uint32_t rate = 1000,
              uint32_t log_rate = 10000
              ) : TimedTask(millis()),
                  m_pin(pin),
