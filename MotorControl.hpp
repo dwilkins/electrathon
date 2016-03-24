@@ -123,14 +123,12 @@ private:
 
   uint8_t pendingCommands(uint32_t after_when = 0);
   bool addCommand(uint32_t when, int motor_level,int transmission_level);
-
+  uint32_t shiftPosition(float amps, float speed, float throttle);
   void increment_next_free();
 
   void change_motor_level(int motor_level);
   void change_transmission_level(int transmission_level);
 
-  int transmission_level_from_speed(int increment = 0);
-  int adjusted_transmission_level(int level,int increment = 0);
 
   int m_i2c_addr;
   int m_current_motor_level;

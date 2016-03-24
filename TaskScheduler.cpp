@@ -35,6 +35,7 @@ void TaskScheduler::run() {
       Serial.print(tasks[t]->getLogHeader());
     }
   Serial1.println("");
+  Serial.println("");
   }
   while (1) {
     uint32_t now = millis();

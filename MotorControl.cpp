@@ -72,36 +72,84 @@ void MotorControl::processInputValues(uint32_t now) {
   if(motor_level_distance < m_motor_level_resolution) {
     motor_level = m_target_motor_level;
   }
-  
+
   if (m_throttle < m_throttle_threshold) {
     int new_transmission_level = 0;
     uint32_t command_time = 0;
-    
-    if (m_amps > 60) {
-      new_transmission_level = transmission_level_from_speed(-1);
-      command_time = now;
-    } else {
-      new_transmission_level = transmission_level_from_speed(0);
-    }
-    
-    // TODO: handle slowing down and shifting down...
-    addCommand(now,motor_level,new_transmission_level);
-  } else {
-    if(m_amps > 60 && pendingCommands(now) == 0) {
-      addCommand(now,motor_level, adjusted_transmission_level(m_target_transmission_level,-1));
-    } else if(m_amps < 30 ) {  // low load
-         if ( m_current_transmission_level == m_target_transmission_level && pendingCommands() == 0) {
-            if (m_throttle > .90) {
-               addCommand(now,motor_level, transmission_level_from_speed(1));
-            }
-         }
-    } else {
-      if (m_amps > 60) {
-        addCommand(now,motor_level, transmission_level_from_speed(-1));
-      }
+    new_transmission_level = shiftPosition(m_amps,
+                                           m_speed_sense->getSpeed(),
+                                           m_throttle);
+    if(new_transmission_level != m_current_transmission_level) {
+      addCommand(now,0,new_transmission_level);
     }
   }
 }
+static const PROGMEM int32_t shift_table[][2] = {
+  {0    ,0},
+  {179 	,0},
+  {215 	,900},
+  {251 	,1400},
+  {286 	,1700},
+  {322 	,2000},
+  {358 	,2100},
+  {358 	,2300},
+  {394 	,2400},
+  {430 	,2800},
+  {465 	,2900},
+  {465 	,3000},
+  {501 	,3300},
+  {537 	,3400},
+  {573 	,3700},
+  {609 	,3800},
+  {644 	,4000}
+};
+
+/*
+ *  Shift up
+ *    Amps below cutoff
+ *    Speed table position within 10% of maximum
+ *    Throttle above 90%
+ *  Shift down
+ *    Amps too high
+ *    Only shift down 1 position from current speed table position
+ *  Otherwise
+ *    No change
+ */
+
+uint32_t MotorControl::shiftPosition(float amps, float speed, float throttle) {
+  int shift_position = -1;
+  int current_speed = ceil(speed * 10.0);
+  uint32_t previous_speed = 0;
+  int32_t positions[3] = {-1,-1,-1};
+  int32_t speeds[3] =  {-1,-1,-1};
+  for(int i = 0;i < sizeof(shift_table) / sizeof(shift_table[0]);i++) {
+    uint32_t speed = pgm_read_dword_near((uint16_t)&shift_table[i][0]);
+    uint32_t position = pgm_read_dword_near((uint16_t)&shift_table[i][1]);
+    if(current_speed > speed) {   // 1 click below where the mph indicates
+      positions[0] = position;
+      speeds[0] = speed;
+    } else if(positions[1] < 0) { // the position we should be in
+      positions[1] = position;
+      speeds[1] = ceil(speed * 90.0);
+    } else {                      // 1 click above where the mph indicates
+      positions[2] = position;
+      speeds[2] = speed;
+      break;
+    }
+  }
+
+
+  if(amps > TARGET_AMPS) {
+    shift_position = 0;
+  } else if (throttle > m_throttle_threshold && (current_speed > speeds[1])) {
+    shift_position = 2;
+  } else {
+    shift_position = 2;
+  }
+
+  return positions[shift_position];
+}
+
 
 //
 // Return true if command was added or removed
@@ -117,28 +165,6 @@ bool MotorControl::processCommands(uint32_t now) {
     }
   }
   return(false);
-}
-//
-// Calculate what the transmission level should be based on the current
-// speed. Useful for low-throttle situations
-//
-int MotorControl::transmission_level_from_speed(int increment) {
-  return(adjusted_transmission_level(m_speed_sense->getRelativeSpeed() * m_max_transmission_level,increment));
-}
-
-//
-// Turn a raw level into an adjusted level so that we're not
-// making micro adjustments to the transmission (unless we want to)
-//
-//
-
-int MotorControl::adjusted_transmission_level(int level,int increment) {
-  
-  int new_level = ((level / m_transmission_level_resolution)  + increment) * m_transmission_level_resolution;
-  
-  return(new_level > m_max_transmission_level ?
-         m_max_transmission_level :
-         (new_level < 0 ? 0 : new_level));
 }
 
 void MotorControl::change_motor_level(int motor_level) {
@@ -197,8 +223,8 @@ bool MotorControl::addCommand(uint32_t when, int motor_level,int transmission_le
   return !overwrite;
 }
 
-void MotorControl::increment_next_free() {
-  uint32_t min_ready_time = UINT32_MAX;
+ void MotorControl::increment_next_free() {
+   uint32_t min_ready_time = UINT32_MAX;
   uint32_t max_ready_time = 0;
   uint8_t min_ready_index = MOTOR_COMMAND_COUNT + 1;
   uint8_t max_ready_index = MOTOR_COMMAND_COUNT + 1;
@@ -239,9 +265,9 @@ bool MotorControl::readInputValues(uint32_t now) {
   if(now < m_samples.next_input_time) {return false;}
 
   throttle = m_throttle_sense->getLevel();
-  
+
   amps     = m_current_sense->getAmps();
-  
+
   // Shove these values into the array of samples.
   m_samples.samples[m_samples.next_free].sample_time = now;
   m_samples.samples[m_samples.next_free].amps = amps;

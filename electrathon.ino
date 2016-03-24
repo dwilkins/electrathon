@@ -25,12 +25,13 @@ void setup() {
 
   Serial.begin(57600);
   Serial1.begin(57600);
-  Serial.print("Electrathon Brushed Motor");
+  Serial.println("Electrathon Brushed Motor");
 
-  current_sense.init(modeprod);
-  throttle_sense.init(modeprod);
-  speed_sense.init(modeprod);
-  motor_control.init(modeprod);
+  current_sense.init(modetest);
+  throttle_sense.init(modetest);
+  speed_sense.init(modetest);
+  motor_control.init(modetest);
+  delay(500);
 }
 
 
