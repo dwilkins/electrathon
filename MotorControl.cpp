@@ -147,6 +147,10 @@ uint32_t MotorControl::shiftPosition(float amps, float speed, float throttle) {
     shift_position = 2;
   }
 
+  while(positions[shift_position] < 0 && shift_position >= 0) {
+    shift_position--;
+  }
+
   return positions[shift_position];
 }
 
