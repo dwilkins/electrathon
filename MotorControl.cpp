@@ -45,21 +45,7 @@ void MotorControl::run(uint32_t now) {
 //
 // processInputValues should calculate where the speed
 // and transmission should be and insert some commands
-// to achieve that end.   Commands are simply transmission
-// and motor speed values to be updated at specific times.
-// for example, if the throttle is "floored" from a dead
-// stop, it may take several seconds to efficiently
-// achieve maximum speed.
-//
-// Also, if midway through the acceleration the
-// throttle is backed off, some existing unfinished commands
-// will need to be amended to achieve the desired
-// results.
-//
-// Maybe this is too complicated, but it seems like the
-// only way to allow multiple inputs (Amps + Throttle + Speed)
-// to generate rapid, yet smooth acceleration with
-// optional shifing.
+// to achieve that end.
 //
 void MotorControl::processInputValues(uint32_t now) {
   int new_transmission_level = 0;
@@ -70,15 +56,22 @@ void MotorControl::processInputValues(uint32_t now) {
 
   // If we just shifted, prolly want to wait
   // a while before shifting again (SHIFT_GRACE_PERIOD)
-  if(now < shift_ignore_time) {
-    return;
-  }
+
+   if(now < shift_ignore_time) {
+     m_shift_ignore = true;
+     return;
+   } else {
+     m_shift_ignore = false;
+   }
 
   // if we just shifted *up*, then the amps
   // will spike, so we won't factor the amps
   // into the equation for a while (AMPS_SPIKE_PERIOD)
   if(now > ignore_amps_time) {
     decision_amps = m_amps;
+    m_amps_ignore = false;
+  } else {
+    m_amps_ignore = true;
   }
 
   new_transmission_level = shiftPosition(decision_amps,
@@ -136,19 +129,26 @@ uint32_t MotorControl::shiftPosition(float amps, float speed, float throttle) {
   for(int i = 0;i < sizeof(shift_table) / sizeof(shift_table[0]);i++) {
     uint32_t speed = pgm_read_dword_near((uint16_t)&shift_table[i][0]);
     uint32_t position = pgm_read_dword_near((uint16_t)&shift_table[i][1]);
-    if(current_speed > speed) {   // 1 click below where the mph indicates
+    uint32_t boundary_speed = ceil(speed * 0.9);
+    if(current_speed > boundary_speed) {   // 1 click below where the mph indicates
       positions[0] = position;
-      speeds[0] = speed;
+      speeds[0] = boundary_speed;
     } else if(positions[1] < 0) { // the position we should be in
       positions[1] = position;
-      speeds[1] = ceil(speed * 90.0);
+      speeds[1] = boundary_speed;
     } else {                      // 1 click above where the mph indicates
       positions[2] = position;
       speeds[2] = speed;
       break;
     }
   }
-
+  // for(int i = 0;i < 3;i++) {
+  //   Serial1.print(positions[i]);
+  //   Serial1.print("x - ");
+  //   Serial1.print(speeds[i]);
+  //   Serial1.print("m  ,  ");
+  // }
+  // Serial1.println(' ');
 
   if(amps > TARGET_AMPS) {
     shift_position = 0;
@@ -353,6 +353,16 @@ void MotorControl::populate_log_buffer() {
   strcat(logBuffer,"t");
   strcat(logBuffer,String(m_throttle,2).c_str());
   strcat(logBuffer,"t");
+  if(m_amps_ignore) {
+    strcat(logBuffer,",A");
+  } else {
+    strcat(logBuffer,",a");
+  }
+  if(m_shift_ignore) {
+    strcat(logBuffer,",S");
+  } else {
+    strcat(logBuffer,",s");
+  }
 }
 
 const char *MotorControl::getLogHeader() {

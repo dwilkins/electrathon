@@ -33,9 +33,9 @@
 #include <Servo.h>  // spicer
 
 #define MOTOR_COMMAND_COUNT ((int8_t)10)
-#define TARGET_AMPS 50.0
-#define AMPS_SPIKE_PERIOD 10000
-#define SHIFT_GRACE_PERIOD 1000
+#define TARGET_AMPS 60.0
+#define AMPS_SPIKE_PERIOD 3000
+#define SHIFT_GRACE_PERIOD 500
 
 class MotorControl : public Task {
 public:
@@ -130,7 +130,8 @@ private:
 
   void change_transmission_level(int transmission_level);
 
-
+  bool m_shift_ignore;
+  bool m_amps_ignore;
   int m_i2c_addr;
   int m_current_motor_level;
   int m_target_motor_level;
