@@ -62,28 +62,40 @@ void MotorControl::run(uint32_t now) {
 // optional shifing.
 //
 void MotorControl::processInputValues(uint32_t now) {
-  // calculate motor speed
-  // calculate transmission setting
-  // calculate number of steps and step spacing to achieve
-  // insert the commands that are required to make it happen
-  // PROFIT
-  int motor_level = ceil((m_throttle / 100.0) * m_max_motor_level);
-  int motor_level_distance = abs(motor_level - m_target_motor_level);
-  if(motor_level_distance < m_motor_level_resolution) {
-    motor_level = m_target_motor_level;
+  int new_transmission_level = 0;
+  uint32_t command_time = 0;
+  float decision_amps = TARGET_AMPS - 1.0;
+  static uint32_t ignore_amps_time  = 0;
+  static uint32_t shift_ignore_time = 0;
+
+  // If we just shifted, prolly want to wait
+  // a while before shifting again (SHIFT_GRACE_PERIOD)
+  if(now < shift_ignore_time) {
+    return;
   }
 
-  if (m_throttle < m_throttle_threshold) {
-    int new_transmission_level = 0;
-    uint32_t command_time = 0;
-    new_transmission_level = shiftPosition(m_amps,
-                                           m_speed_sense->getSpeed(),
-                                           m_throttle);
-    if(new_transmission_level != m_current_transmission_level) {
-      addCommand(now,0,new_transmission_level);
+  // if we just shifted *up*, then the amps
+  // will spike, so we won't factor the amps
+  // into the equation for a while (AMPS_SPIKE_PERIOD)
+  if(now > ignore_amps_time) {
+    decision_amps = m_amps;
+  }
+
+  new_transmission_level = shiftPosition(decision_amps,
+                                         m_speed_sense->getSpeed(),
+                                         m_throttle);
+  if(new_transmission_level != m_current_transmission_level) {
+    if(new_transmission_level > m_current_transmission_level) {
+      ignore_amps_time = now + AMPS_SPIKE_PERIOD;
     }
+    shift_ignore_time = now + SHIFT_GRACE_PERIOD;
+    addCommand(now,0,new_transmission_level);
   }
 }
+
+/*
+ * shift_table is {(integer)(speed * 10.0), transmission_position}
+ */
 static const PROGMEM int32_t shift_table[][2] = {
   {0    ,0},
   {179 	,0},
@@ -143,7 +155,7 @@ uint32_t MotorControl::shiftPosition(float amps, float speed, float throttle) {
   } else if (throttle > m_throttle_threshold && (current_speed > speeds[1])) {
     shift_position = 2;
   } else {
-    shift_position = 2;
+    shift_position = 1;
   }
 
   while(positions[shift_position] < 0 && shift_position >= 0) {
@@ -157,22 +169,15 @@ uint32_t MotorControl::shiftPosition(float amps, float speed, float throttle) {
 //
 // Return true if command was added or removed
 // update current / target for speed / transmission
-
 //
 bool MotorControl::processCommands(uint32_t now) {
   for(int i=m_commands.next_to_process;i<MOTOR_COMMAND_COUNT;i++) {
     if(!m_commands.commands[i].completed && m_commands.commands[i].command_time < now) {
-      change_motor_level(m_commands.commands[i].motor_level);
       change_transmission_level(m_commands.commands[i].transmission_level);
       m_commands.commands[i].completed = true;
     }
   }
   return(false);
-}
-
-void MotorControl::change_motor_level(int motor_level) {
-  m_current_motor_level = motor_level;
-  // motor monitored but not controlled.
 }
 
 

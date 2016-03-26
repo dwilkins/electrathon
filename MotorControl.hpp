@@ -34,6 +34,8 @@
 
 #define MOTOR_COMMAND_COUNT ((int8_t)10)
 #define TARGET_AMPS 50.0
+#define AMPS_SPIKE_PERIOD 10000
+#define SHIFT_GRACE_PERIOD 1000
 
 class MotorControl : public Task {
 public:
@@ -126,7 +128,6 @@ private:
   uint32_t shiftPosition(float amps, float speed, float throttle);
   void increment_next_free();
 
-  void change_motor_level(int motor_level);
   void change_transmission_level(int transmission_level);
 
 
