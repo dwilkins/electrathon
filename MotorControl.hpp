@@ -43,7 +43,7 @@ public:
                CurrentSense *current_sense,
                ThrottleSense *throttle_sense,
                SpeedSense *speed_sense,
-               uint32_t log_rate = 10000
+               uint32_t log_rate = 1000 // log every 1 sec regardless
                ) : Task(),
                    m_i2c_addr(i2c_addr),
                    m_current_sense(current_sense),
@@ -51,6 +51,7 @@ public:
                    m_speed_sense(speed_sense)
   {
     // Do some setup stuff?
+    logRate = log_rate;
     m_samples.next_free = 0;
     for(int i = 0; i< sizeof(m_samples.samples) / sizeof(m_samples.samples[0]); i++) {
       m_samples.samples[i].sample_time = 0;

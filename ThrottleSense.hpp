@@ -31,7 +31,7 @@ class ThrottleSense : public TimedTask {
 public:
   ThrottleSense(uint32_t pin,
                 uint32_t rate = 200,
-                uint32_t log_rate = 10000, // log every 10 seconds regardless
+                uint32_t log_rate = 1000, // log every 1 seconds regardless
                 uint32_t input_min = 0,
                 uint32_t input_max = 185,
                 float output_min = 0.0,
@@ -43,6 +43,7 @@ public:
                                             m_output_min(output_min),
                                             m_output_max(output_max)
   {
+    logRate = log_rate;
     m_level = 0.0;
     m_old_level = 0.0;
     m_last_input_time = 0;

@@ -32,12 +32,13 @@ public:
   SpeedSense(uint32_t pin,
              float wheel_circumference,
              uint32_t rate = 1000,
-             uint32_t log_rate = 10000
+             uint32_t log_rate = 1000 // every 1 second regardless
              ) : TimedTask(millis()),
                  m_pin(pin),
                  m_rate(rate),
                  m_wheel_circumference(wheel_circumference)
   {
+    logRate = log_rate;
     m_speed = m_old_speed = 0.0;
     m_rpm = m_old_rpm = 0.0;
     m_last_input_time = 0;

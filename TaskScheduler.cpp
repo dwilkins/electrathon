@@ -26,8 +26,8 @@
 
 void TaskScheduler::run() {
   {
-    Serial1.print("millis");
-    Serial.print("millis");
+    Serial1.print("millis,time");
+    Serial.print("millis,time");
     for (int t = 0; t < numTasks; t++) {
       Serial1.print(",");
       Serial1.print(tasks[t]->getLogHeader());
@@ -47,8 +47,17 @@ void TaskScheduler::run() {
       log_now |= tasks[t]->canLog(now);
     }
     if(log_now) {
-      Serial1.print(now);
-      Serial.print(now);
+      int hours = now / (1000UL*60UL*60UL);
+      int minutes = now / (1000UL*60UL);
+      int seconds = ((now / 1000UL) % 60UL);
+      char time_buffer[10];
+      char millis_buffer[12];
+      sprintf(time_buffer,"%d:%02d:%02d",hours,minutes,seconds);
+      sprintf(millis_buffer,"%7lu,",now);
+      Serial1.print(millis_buffer);
+      Serial.print(millis_buffer);
+      Serial1.print(time_buffer);
+      Serial.print(time_buffer);
       for (int t = 0; t < numTasks; t++) {
         Serial1.print(",");
         Serial1.print(tasks[t]->getLogData(now));

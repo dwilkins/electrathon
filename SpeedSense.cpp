@@ -35,10 +35,10 @@ void SpeedSense::run(uint32_t now) {
 
 void SpeedSense::populate_log_buffer() {
   static const char mph_str[] PROGMEM = "mph";
-  static const char rpm_str[] PROGMEM = "rpm";
-  strcat(logBuffer,String(m_rpm).c_str());
+  static const char rpm_str[] PROGMEM = "rpm,";
+  strcpy(logBuffer,String(m_rpm).c_str());
   strcat_P(logBuffer,rpm_str);
-  strcpy(logBuffer,String(m_speed,2).c_str());
+  strcat(logBuffer,String(m_speed,2).c_str());
   strcat_P(logBuffer,mph_str);
 }
 
@@ -77,7 +77,15 @@ int16_t SpeedSense::readInputValue(uint32_t now) {
       {10000,34},
       {20000,70},
       {30000,80},
-      {40000,100}
+      {40000,100},
+      {45000,120},
+      {50000,140},
+      {55000,160},
+      {60000,170},
+      {65000,180},
+      {70000,180},
+      {75000,180},
+      {85000,180}
     };
     // Serial.print(F("m_last_input_time="));
     // Serial.print(m_last_input_time);

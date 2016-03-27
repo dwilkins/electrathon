@@ -49,10 +49,10 @@ public:
   virtual void init(RunMode mode) {setRunMode(mode);};
   virtual void setRunMode(RunMode mode) { runMode = mode;}
 
+  uint32_t logRate;
 protected:
   char logBuffer[TASK_LOG_BUFFER_SIZE];
   uint32_t logTime;
-  uint32_t logRate;
   RunMode runMode;
 };
 

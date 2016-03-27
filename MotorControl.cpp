@@ -30,8 +30,8 @@ bool MotorControl::canRun(uint32_t now) {
 void MotorControl::run(uint32_t now) {
   bool values_changed = readInputValues(now);
   if(values_changed || now > m_next_evaluation) {
-    values_changed = true;
-    m_next_evaluation = now + 250;
+    //values_changed = true;
+    m_next_evaluation = now + 500;
     processInputValues(now);
   }
   values_changed |= processCommands(now);
@@ -171,13 +171,15 @@ uint32_t MotorControl::shiftPosition(float amps, float speed, float throttle) {
 // update current / target for speed / transmission
 //
 bool MotorControl::processCommands(uint32_t now) {
+  bool command_processed = false;
   for(int i=m_commands.next_to_process;i<MOTOR_COMMAND_COUNT;i++) {
     if(!m_commands.commands[i].completed && m_commands.commands[i].command_time < now) {
       change_transmission_level(m_commands.commands[i].transmission_level);
+      command_processed = true;
       m_commands.commands[i].completed = true;
     }
   }
-  return(false);
+  return(command_processed);
 }
 
 
@@ -334,23 +336,12 @@ uint8_t MotorControl::pendingCommands(uint32_t after_when) {
 //
 void MotorControl::populate_log_buffer() {
   static const char tab_str[] PROGMEM = ",";
-  strcpy(logBuffer,"*");
-  strcat(logBuffer,String(m_current_motor_level).c_str());
-  strcat(logBuffer,"*");
-  strcat_P(logBuffer,tab_str);
-  strcat(logBuffer,String(m_target_motor_level).c_str());
-  strcat_P(logBuffer,tab_str);
-  strcat(logBuffer,"x");
-  strcat(logBuffer,String(m_current_transmission_level).c_str());
-  strcat(logBuffer,"x");
-  strcat_P(logBuffer,tab_str);
-  strcat(logBuffer,"x");
-  strcat(logBuffer,String(m_target_transmission_level).c_str());
+  strcpy(logBuffer,String(m_current_transmission_level).c_str());
   strcat(logBuffer,"x");
   strcat_P(logBuffer,tab_str);
   strcat(logBuffer,String(m_amps,2).c_str());
+  strcat(logBuffer,"a");
   strcat_P(logBuffer,tab_str);
-  strcat(logBuffer,"t");
   strcat(logBuffer,String(m_throttle,2).c_str());
   strcat(logBuffer,"t");
   if(m_amps_ignore) {
@@ -366,5 +357,5 @@ void MotorControl::populate_log_buffer() {
 }
 
 const char *MotorControl::getLogHeader() {
-  return "current_motor,target_motor,current_gear,target_gear,amps,throttle";
+  return "current_gear,amps,throttle,amps_ignore,shift_grace";
 }
