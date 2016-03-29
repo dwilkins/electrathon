@@ -33,8 +33,9 @@
 #include <Servo.h>  // spicer
 
 #define MOTOR_COMMAND_COUNT ((int8_t)10)
-#define TARGET_AMPS 60.0
+#define TARGET_AMPS 70.0
 #define AMPS_SPIKE_PERIOD 3000
+#define HS_AMPS_SPIKE_PERIOD 5000
 #define SHIFT_GRACE_PERIOD 500
 
 class MotorControl : public Task {

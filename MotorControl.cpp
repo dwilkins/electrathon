@@ -79,7 +79,11 @@ void MotorControl::processInputValues(uint32_t now) {
                                          m_throttle);
   if(new_transmission_level != m_current_transmission_level) {
     if(new_transmission_level > m_current_transmission_level) {
-      ignore_amps_time = now + AMPS_SPIKE_PERIOD;
+      if(new_transmission_level > 2000) {
+        ignore_amps_time = now + HS_AMPS_SPIKE_PERIOD;
+      } else {
+        ignore_amps_time = now + AMPS_SPIKE_PERIOD;
+      }
     }
     shift_ignore_time = now + SHIFT_GRACE_PERIOD;
     addCommand(now,0,new_transmission_level);
@@ -96,8 +100,8 @@ static const PROGMEM int32_t shift_table[][2] = {
   {251 	,1400},
   {286 	,1700},
   {322 	,2000},
-  {358 	,2300},
-  {394 	,2400},
+  {358 	,2400},
+  {394 	,2550},
   {430 	,2800},
   {465 	,2900},
   {465 	,3000},
@@ -107,6 +111,22 @@ static const PROGMEM int32_t shift_table[][2] = {
   {609 	,3800},
   {644 	,4000}
 };
+  // {0    ,0},
+  // {179 	,0},
+  // {215 	,900},
+  // {251 	,1400},
+  // {286 	,1700},
+  // {322 	,2000},
+  // {358 	,2300},
+  // {394 	,2400},
+  // {430 	,2800},
+  // {465 	,2900},
+  // {465 	,3000},
+  // {501 	,3300},
+  // {537 	,3400},
+  // {573 	,3700},
+  // {609 	,3800},
+  // {644 	,4000}
 
 /*
  *  Shift up
@@ -129,7 +149,7 @@ uint32_t MotorControl::shiftPosition(float amps, float speed, float throttle) {
   for(int i = 0;i < sizeof(shift_table) / sizeof(shift_table[0]);i++) {
     uint32_t speed = pgm_read_dword_near((uint16_t)&shift_table[i][0]);
     uint32_t position = pgm_read_dword_near((uint16_t)&shift_table[i][1]);
-    uint32_t boundary_speed = ceil(speed * 0.9);
+    uint32_t boundary_speed = ceil(speed * 0.825);
     if(current_speed > boundary_speed) {   // 1 click below where the mph indicates
       positions[0] = position;
       speeds[0] = boundary_speed;
