@@ -2,22 +2,17 @@
 
 
 void ThrottleSense::init(RunMode mode) {
-  // do some stuff to initialize it
-  //  Serial.println("ThrottleSense::init ");
   populate_log_buffer();
-  setLogTime(millis());
   Task::init(mode);
 }
 
 void ThrottleSense::run(uint32_t now) {
   incRunTime(m_rate);
 
-  // TODO: Figure out the throttle level
   m_input_level = readInputValue(now);
   processInputValue(now);
   if(m_level != m_old_level) {
     populate_log_buffer();
-    setLogTime(now);
     m_old_level = m_level;
   }
 }

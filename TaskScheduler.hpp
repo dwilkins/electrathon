@@ -1,5 +1,5 @@
 /*
- * Task.hpp
+ * TaskScheduler.hpp
  *
  * (C) Copyright 2013
  * David H. Wilkins  <dwilkins@conecuh.com>
@@ -22,13 +22,23 @@
  * MA 02111-1307 USA
  */
 
+#ifndef TASK_SCHEDULER_HPP
+#define TASK_SCHEDULER_HPP
+
 #include "Task.hpp"
+
+#define HEADER_FREQENCY_MILLIS 60000
+
 
 class TaskScheduler {
 public:
-    TaskScheduler(Task **task, uint8_t numTasks);
-    void run();
+  TaskScheduler(Task **task, uint8_t numTasks);
+  void run();
 private:
-    Task **tasks;
-    int numTasks;
+  void printHeaders(uint32_t now);
+  Task **tasks;
+  int numTasks;
+  uint32_t m_lastHeaderOutputMillis;
 };
+
+#endif

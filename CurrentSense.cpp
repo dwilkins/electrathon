@@ -4,7 +4,6 @@ void CurrentSense::init(RunMode mode) {
 
   // do some stuff to initialize it
   populate_log_buffer();
-  setLogTime(millis());
 
   Task::init(mode);
 
@@ -29,7 +28,6 @@ void CurrentSense::run(uint32_t now) {
   // Always populate_log_buffer 'cuz the amp-hours will have changed
   populate_log_buffer();
   if(m_amps != m_old_amps || canLog(now)) {
-    setLogTime(now);
     m_old_amps = m_amps;
   }
   m_last_measurement = now;
@@ -37,13 +35,13 @@ void CurrentSense::run(uint32_t now) {
 
 void CurrentSense::populate_log_buffer() {
   strcpy(logBuffer,String(m_amps,2).c_str());
-  strcat(logBuffer,"A,");
+  strcat(logBuffer,"A, ");
   strcat(logBuffer,String(m_cumulative_amp_hours,7).c_str());
   strcat(logBuffer,"ah");
 }
 
 const char *CurrentSense::getLogHeader() {
-  return "current_amps,amp_hours";
+  return "current_amps, amp_hours";
 }
 
 void CurrentSense::processInputValue(uint32_t now) {

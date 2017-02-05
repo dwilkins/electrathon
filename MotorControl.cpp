@@ -37,7 +37,6 @@ void MotorControl::run(uint32_t now) {
   values_changed |= processCommands(now);
   if(values_changed) {
     populate_log_buffer();
-    setLogTime(now);
   }
 }
 
@@ -355,7 +354,7 @@ uint8_t MotorControl::pendingCommands(uint32_t after_when) {
 // needed.
 //
 void MotorControl::populate_log_buffer() {
-  static const char tab_str[] PROGMEM = ",";
+  static const char tab_str[] PROGMEM = ", ";
   strcpy(logBuffer,String(m_current_transmission_level).c_str());
   strcat(logBuffer,"x");
   strcat_P(logBuffer,tab_str);
@@ -365,14 +364,14 @@ void MotorControl::populate_log_buffer() {
   strcat(logBuffer,String(m_throttle,2).c_str());
   strcat(logBuffer,"t");
   if(m_amps_ignore) {
-    strcat(logBuffer,",A");
+    strcat(logBuffer,", A");
   } else {
-    strcat(logBuffer,",a");
+    strcat(logBuffer,", a");
   }
   if(m_shift_ignore) {
-    strcat(logBuffer,",S");
+    strcat(logBuffer,", S");
   } else {
-    strcat(logBuffer,",s");
+    strcat(logBuffer,", s");
   }
 }
 

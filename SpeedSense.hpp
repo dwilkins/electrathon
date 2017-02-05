@@ -1,7 +1,7 @@
 /*
  * SpeedSense.hpp
  *
- * (C) Copyright 2016
+ * (C) Copyright 2016-2017
  * David H. Wilkins  <dwilkins@conecuh.com>
  *
  * This program is free software; you can redistribute it and/or
@@ -25,7 +25,8 @@
 #define SPEED_SENSE_HPP
 #include "Task.hpp"
 
-
+#define PULSES_PER_WHEEL_REVOLUTION 2UL
+#define MAX_PULSE_AGE_MILLIS 70000UL
 
 class SpeedSense : public TimedTask {
 public:
@@ -39,8 +40,8 @@ public:
                  m_wheel_circumference(wheel_circumference)
   {
     logRate = log_rate;
-    m_speed = m_old_speed = 0.0;
-    m_rpm = m_old_rpm = 0.0;
+    m_speed = 0.0;
+    m_rpm = 0.0;
     m_last_input_time = 0;
     m_wheel_circumference_in_miles = m_wheel_circumference / 63360.0;
     m_top_speed = 42.0;
@@ -65,13 +66,12 @@ private:
 
   void read_input_value();
   int16_t m_pin;
-  float m_rpm;
-  float m_old_rpm;
+  uint16_t m_rpm;
   float m_wheel_circumference;
   float m_wheel_circumference_in_miles;
   float m_speed;
-  float m_old_speed;
   float m_top_speed;
+  uint32_t m_pulse_duration;
   uint32_t m_rate; // In milliseconds
   uint32_t m_last_input_time;
   void populate_log_buffer();

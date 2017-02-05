@@ -25,18 +25,7 @@
 #include "TaskScheduler.hpp"
 
 void TaskScheduler::run() {
-  {
-    Serial1.print("millis,time");
-    Serial.print("millis,time");
-    for (int t = 0; t < numTasks; t++) {
-      Serial1.print(",");
-      Serial1.print(tasks[t]->getLogHeader());
-      Serial.print(",");
-      Serial.print(tasks[t]->getLogHeader());
-    }
-  Serial1.println("");
-  Serial.println("");
-  }
+  printHeaders(0);
   while (1) {
     uint32_t now = millis();
     bool log_now = false;
@@ -52,6 +41,7 @@ void TaskScheduler::run() {
       int seconds = ((now / 1000UL) % 60UL);
       char time_buffer[10];
       char millis_buffer[12];
+      printHeaders(now);
       sprintf(time_buffer,"%d:%02d:%02d",hours,minutes,seconds);
       sprintf(millis_buffer,"%7lu,",now);
       Serial1.print(millis_buffer);
@@ -59,9 +49,9 @@ void TaskScheduler::run() {
       Serial1.print(time_buffer);
       Serial.print(time_buffer);
       for (int t = 0; t < numTasks; t++) {
-        Serial1.print(",");
+        Serial1.print(", ");
         Serial1.print(tasks[t]->getLogData(now));
-        Serial.print(",");
+        Serial.print(", ");
         Serial.print(tasks[t]->getLogData(now));
       }
       Serial1.println("");
@@ -73,4 +63,23 @@ void TaskScheduler::run() {
 TaskScheduler::TaskScheduler(Task **_tasks, uint8_t _numTasks) :
   tasks(_tasks),
   numTasks(_numTasks) {
+  m_lastHeaderOutputMillis = millis();
+}
+
+void TaskScheduler::printHeaders(uint32_t now) {
+  if(((now - m_lastHeaderOutputMillis) > HEADER_FREQENCY_MILLIS) ||
+     m_lastHeaderOutputMillis == 0
+     ){
+    Serial1.print("millis,time");
+    Serial.print("millis,time");
+    for (int t = 0; t < numTasks; t++) {
+      Serial1.print(",");
+      Serial1.print(tasks[t]->getLogHeader());
+      Serial.print(",");
+      Serial.print(tasks[t]->getLogHeader());
+    }
+  Serial1.println("");
+  Serial.println("");
+  m_lastHeaderOutputMillis = now;
+  }
 }
