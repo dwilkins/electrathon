@@ -23,6 +23,7 @@
 #include "SpeedSense.hpp"
 
 volatile uint16_t v_current_rpm = 0;
+volatile uint32_t v_pulse_times[2] = {0,0};
 volatile uint32_t v_current_rpm_pulse_micros = 0;
 volatile uint32_t v_last_rpm_pulse_micros = 0;
 volatile uint32_t v_last_rpm_pulse_millis = 0;
@@ -47,6 +48,7 @@ void SpeedSense::run(uint32_t now) {
   incRunTime(m_rate);
   m_rpm = readInputValue(now);
   processInputValue(now);
+  populate_log_buffer();
 }
 
 void SpeedSense::populate_log_buffer() {
@@ -72,9 +74,7 @@ int16_t SpeedSense::readInputValue(uint32_t now) {
   uint16_t rpm = 0;
   uint32_t last_interrupt_millis = 0;
   int16_t current_rpms = -1;
-  uint32_t current_input_time;
   if(runMode == Task::RunMode::production) {
-    current_input_time = millis();
     noInterrupts();
     last_interrupt_millis = v_last_rpm_pulse_millis;
     rpm = v_current_rpm;
@@ -114,10 +114,10 @@ int16_t SpeedSense::readInputValue(uint32_t now) {
       }
     }
   }
-  if((now - last_interrupt_millis) > MAX_PULSE_AGE_MILLIS) {
+  if((now > last_interrupt_millis) && ((now - last_interrupt_millis) > MAX_PULSE_AGE_MILLIS)) {
     rpm = 0;
-    m_last_input_time = current_input_time;
   }
+  m_last_input_time = now;
   return rpm;
 }
 
@@ -135,7 +135,9 @@ void rpm_interrupt() {
   } else {
     uint32_t pulse_time = 0;
     v_current_rpm_pulse_micros = micros();
-    pulse_time = v_current_rpm_pulse_millis - v_last_rpm_pulse_millis;
+    v_pulse_times[0] = v_pulse_times[1];
+    v_pulse_times[1] = v_current_rpm_pulse_micros - v_last_rpm_pulse_micros;
+    pulse_time = (v_pulse_times[0] + v_pulse_times[1]) / 2;
     if(v_last_rpm_pulse_micros != 0) {
       if(v_last_rpm_pulse_micros < v_current_rpm_pulse_micros) {
         v_current_rpm = (((1000UL * 1000UL * 60UL) / PULSES_PER_WHEEL_REVOLUTION)/(pulse_time));

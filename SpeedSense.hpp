@@ -26,7 +26,7 @@
 #include "Task.hpp"
 
 #define PULSES_PER_WHEEL_REVOLUTION 2UL
-#define MAX_PULSE_AGE_MILLIS 70000UL
+#define MAX_PULSE_AGE_MILLIS 2000UL
 
 class SpeedSense : public TimedTask {
 public:

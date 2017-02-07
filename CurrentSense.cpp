@@ -36,7 +36,7 @@ void CurrentSense::run(uint32_t now) {
 void CurrentSense::populate_log_buffer() {
   strcpy(logBuffer,String(m_amps,2).c_str());
   strcat(logBuffer,"A, ");
-  strcat(logBuffer,String(m_cumulative_amp_hours,7).c_str());
+  strcat(logBuffer,String(m_cumulative_amp_hours,3).c_str());
   strcat(logBuffer,"ah");
 }
 
@@ -61,7 +61,7 @@ int16_t CurrentSense::readInputValue(uint32_t now) {
 
   if(runMode == Task::RunMode::production) {
 
-      input_value = ads.readADC_Differential_2_3(); // spicer
+      input_value = ads.readADC_Differential_0_1(); // spicer
 
     //  input_value = ads.readADC_SingleEnded(1);
 
