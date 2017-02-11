@@ -78,6 +78,9 @@ void MotorControl::processInputValues(uint32_t now) {
                                          m_throttle);
   if(new_transmission_level != m_current_transmission_level) {
     if(new_transmission_level > m_current_transmission_level) {
+      if(m_amps > TARGET_AMPS) {
+        return;
+      }
       if(new_transmission_level > 2000) {
         ignore_amps_time = now + HS_AMPS_SPIKE_PERIOD;
       } else {
