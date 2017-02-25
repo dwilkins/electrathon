@@ -76,10 +76,11 @@ void MotorControl::processInputValues(uint32_t now) {
   new_transmission_level = shiftPosition(decision_amps,
                                          m_speed_sense->getSpeed(),
                                          m_throttle);
+  m_amps_too_high = false;
   if(new_transmission_level != m_current_transmission_level) {
     if(new_transmission_level > m_current_transmission_level) {
       if(m_amps > TARGET_AMPS) {
-        return;
+        m_amps_too_high = true;
       }
       if(new_transmission_level > 2000) {
         ignore_amps_time = now + HS_AMPS_SPIKE_PERIOD;
@@ -87,8 +88,11 @@ void MotorControl::processInputValues(uint32_t now) {
         ignore_amps_time = now + AMPS_SPIKE_PERIOD;
       }
     }
-    shift_ignore_time = now + SHIFT_GRACE_PERIOD;
-    addCommand(now,0,new_transmission_level);
+    if(!m_amps_too_high) {
+      m_amps_too_high = false;
+      shift_ignore_time = now + SHIFT_GRACE_PERIOD;
+      addCommand(now,0,new_transmission_level);
+    }
   }
 }
 
@@ -370,6 +374,9 @@ void MotorControl::populate_log_buffer() {
     strcat(logBuffer,", A");
   } else {
     strcat(logBuffer,", a");
+  }
+  if(m_amps_too_high) {
+    strcat(logBuffer,"+");
   }
   if(m_shift_ignore) {
     strcat(logBuffer,", S");

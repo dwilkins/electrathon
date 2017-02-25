@@ -33,7 +33,7 @@
 #include <Servo.h>  // spicer
 
 #define MOTOR_COMMAND_COUNT ((int8_t)10)
-#define TARGET_AMPS 50.0
+#define TARGET_AMPS 60.0
 #define AMPS_SPIKE_PERIOD 3000
 #define HS_AMPS_SPIKE_PERIOD 5000
 #define SHIFT_GRACE_PERIOD 500
@@ -67,6 +67,7 @@ public:
     m_target_motor_level = m_current_motor_level = 0;
     m_target_transmission_level = m_current_transmission_level = 0;
     m_amps = 0.0;
+    m_amps_too_high = false;
     m_throttle = 0.0;
     m_amps_resolution = 0.5;
     m_throttle_resolution = 0.5;
@@ -134,6 +135,7 @@ private:
 
   bool m_shift_ignore;
   bool m_amps_ignore;
+  bool m_amps_too_high;
   int m_i2c_addr;
   int m_current_motor_level;
   int m_target_motor_level;
